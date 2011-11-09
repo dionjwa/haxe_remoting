@@ -1,6 +1,6 @@
 [haxe]: http://http://haxe.org
 
-# Asyncronous remoting classes for [Haxe][haxe]
+# Asynchronous remoting classes for [Haxe][haxe]
 
 This package consists of:
 
