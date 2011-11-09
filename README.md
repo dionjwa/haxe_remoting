@@ -66,4 +66,4 @@ Then:
 	
 Then navigate to http://localhost:8000 and http://localhost:8001
 
-Both should show 1 error and 1 success.
+Both should show 1 error and 1 success.  Yeah, this demo could be better.
