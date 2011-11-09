@@ -1,11 +1,4 @@
-build*
 .DS_Store
-.svn
-.hg
-*.git
-*.swf
-*.js
-*cpp*
 \#*#
 client.js
 server.js
