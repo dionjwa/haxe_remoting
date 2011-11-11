@@ -21,8 +21,8 @@ class Server
 	{
 		var context = new haxe.remoting.Context();
 		
-		var remotingmanager = new RemotingService();
-		context.addObject(haxe.remoting.Macros.getRemotingIdFromClassDef(IRemotingService), remotingmanager);
+		var remotingmanager = new foo.RemotingService();
+		context.addObject(haxe.remoting.Macros.getRemotingIdFromClassDef(foo.IRemotingService), remotingmanager);
 		
 		var remotingHandler = new NodeJsHtmlConnection(context);
 
@@ -56,8 +56,8 @@ class Server
 	{
 		var context = new haxe.remoting.Context();
 		
-		var remotingmanager = new RemotingServiceNodeRelay();
-		context.addObject(haxe.remoting.Macros.getRemotingIdFromClassDef(RemotingServiceNodeRelay), remotingmanager);
+		var remotingmanager = new foo.RemotingServiceNodeRelay();
+		context.addObject(haxe.remoting.Macros.getRemotingIdFromClassDef(foo.RemotingServiceNodeRelay), remotingmanager);
 		
 		var remotingHandler = new NodeJsRelayHtmlConnection(context);
 

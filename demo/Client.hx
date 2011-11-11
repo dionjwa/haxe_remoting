@@ -8,8 +8,6 @@ class Client
 {
 	public static function main ()
 	{
-		// var s :String = "sdfdsf";
-		// s.
 		var conn1 = haxe.remoting.HttpAsyncConnection.urlConnect("http://localhost:8000");
 		conn1.setErrorHandler( function(err) trace("Error : " + err));
 		
@@ -19,12 +17,12 @@ class Client
 		var str = new String("dsdsffd");
 		str.charAt(1);
 		
-		var nonNodeRelayProxy = new RemotingProxy(conn1);
+		var nonNodeRelayProxy = new foo.RemotingProxy(conn1);
 		nonNodeRelayProxy.getFoos(function (foos :Array<String>) :Void {
 			trace("successfully called non-NodeRelay proxy, foos=" + foos);
 		});
 
-		var nodeRelayProxy = haxe.remoting.Macros.buildRemoteProxyClass(RemotingServiceNodeRelay, conn2);
+		var nodeRelayProxy = haxe.remoting.Macros.buildRemoteProxyClass(foo.RemotingServiceNodeRelay, conn2);
 		
 		nodeRelayProxy.getFoos(function (foos :Array<String>) :Void {
 			trace("successfully called NodeRelay proxy, foos=" + foos);

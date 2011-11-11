@@ -1,4 +1,4 @@
-package ;
+package foo;
 
 @remoteId("fooService")
 interface IRemotingService

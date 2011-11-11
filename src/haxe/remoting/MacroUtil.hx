@@ -9,7 +9,6 @@ import haxe.macro.Context;
 
 class MacroUtil
 {
-	
 	/**
 	  * Create a class type constant from a class name.
 	  */
@@ -31,15 +30,6 @@ class MacroUtil
 			}
 		}
 		
-		// var e = Context.parse("x=String", Context.currentPos());
-		// Context.warning(Std.string(e), Context.currentPos());
-		
-		// if (pathExpr == null) {
-		// 	pathExpr = {expr: EConst(CType(className)), pos: pos};
-		// 	return pathExpr; 
-		// }
-		
-		Context.warning("pathExpr=" + pathExpr, Context.currentPos());
 		return {
 			expr: EType(pathExpr, pathTokens.shift()),
 			pos: pos
@@ -120,6 +110,7 @@ class MacroUtil
 	
 	public static function getClassNameFromClassExpr (classNameExpr :Expr) :String
 	{
+		// Context.warning("classNameExpr=" + classNameExpr, Context.currentPos());
 		var drillIntoEField = null;
 		var className = "";
 		drillIntoEField = function (e :Expr) :String {
@@ -151,9 +142,9 @@ class MacroUtil
 					case EConst(c):
 						switch(c) {
 							case CIdent(s):
-								className = s;
+								className = s + "." + className;
 							case CString(s):
-								className = s;
+								className = s + "." + className;
 							default:Context.warning(SType.enumConstructor(c) + " not handled", Context.currentPos());
 						}
 					default: Context.warning(SType.enumConstructor(e1.expr) + " not handled", Context.currentPos());
@@ -170,7 +161,6 @@ class MacroUtil
 				}
 			default: Context.warning(SType.enumConstructor(classNameExpr.expr) + " not handled", Context.currentPos());
 		}
-		
 		return className;
 	}
 	

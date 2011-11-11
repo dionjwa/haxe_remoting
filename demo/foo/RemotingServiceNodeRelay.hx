@@ -1,4 +1,4 @@
-package ;
+package foo;
 
 /**
   * This remoting class does not use interfaces.  The client proxy is built via:
