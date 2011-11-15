@@ -73,7 +73,8 @@ class Macros
 		var remotingId = MacroUtil.getRemotingIdFromClassDef(interfaceName);
 		
 		var fields = haxe.macro.Context.getBuildFields();
-		fields = fields.concat(createAsyncProxyMethodsFromRemoteClassInternal(interfaceName, false));
+		fields = fields.concat(createAsyncProxyMethodsFromRemoteClassInternal(interfaceName));
+		
 		return fields;
 	}
 	
@@ -112,6 +113,39 @@ class Macros
 		}
 	}
 	
+	@:macro
+	public static function buildAndInstantiateRemoteProxyClassFromName(className: String, connectionExpr: Expr) :Expr
+	{
+		var pos = Context.currentPos();
+		var proxyClassName = MacroUtil.getProxyRemoteClassName(className);
+		
+		try {
+			var proxyType = Context.getType(proxyClassName);
+			var typePath :TypePath = {
+				sub: null,
+				params: [],
+				pack: [],
+				name: ""
+			}
+			switch(proxyType) {
+				case TInst(typeRef, params):
+					typePath.name = typeRef.get().name;
+					typePath.pack = typeRef.get().pack;
+				default: Context.warning("Type not handled: " + StdType.enumConstructor(proxyType), pos);
+			}
+			return 
+			{
+				expr: ENew(typePath, [connectionExpr]), 
+				pos:pos
+			};
+		} catch (e :Dynamic) {
+			return buildRemoteProxyClassInternal(className, connectionExpr);
+		}
+	}
+	
+	/**
+	  * Returns a Class constant.
+	  */
 	@:macro
 	public static function buildRemoteProxyClass(classExpr: Expr, connectionExpr: Expr) :Expr
 	{
@@ -341,67 +375,7 @@ class Macros
 	  * Helper functions
 	  */
 	#if macro
-	/**
-	  * Adds all methods from implemented interfaces for a class extending 
-	  * net.amago.components.remoting.AsyncProxy
-	  */
-	static function createAsyncProxyMethodsFromInterfaceInternal(interfaceName :String) :Array<Field>
-	{
-		var fields = [];
-		var pos = Context.currentPos();
-		
-		var functionRegex : EReg = ~/^[ \t]*function[ \t]*.*/;
-		var interfaceFunctionExprs = [];
-		
-		var interfaceFileName = interfaceName.split(".").join("/") + ".hx";
-		var path = Context.resolvePath(interfaceFileName);
-		for (line in neko.io.File.getContent(path).split("\n")) {
-			if (functionRegex.match(line)) {
-				var parserCompatibleLine = line.replace("Void;", "Void {}");
-				var functionExpr = Context.parse(parserCompatibleLine, pos);
-				switch(functionExpr.expr) {
-					case EFunction(name, f)://f is a Function
-						//Function args less the callback
-						var functionArgsForBlock = new Array<String>();
-						var callBackName :String = null;
-						for (arg in f.args) {
-							switch(arg.type) {
-								case TFunction(args, ret)://Ignore the callbacks
-									callBackName = arg.name;
-								default: //add the rest
-									functionArgsForBlock.push(arg.name);
-							}
-						}
-						
-						//Create the function block via parsing a string (too complicated otherwise)
-						var exprStr = '_conn.resolve("' + name + '").call([' + 
-							functionArgsForBlock.join(", ") + ']' + (callBackName != null ? ', ' + callBackName: "") + ')';
-						var functionBlock = ExprDef.EBlock([
-							haxe.macro.Context.parse(exprStr, pos)
-						]);
-						Reflect.setField(f, "expr", {expr:functionBlock, pos :pos});
-						
-						var field :Field = {
-							name : name, 
-							doc :null,
-							access:[Access.APublic],
-							kind :FieldType.FFun(f),
-							pos : pos,
-							meta :[]
-						};
-						
-						fields.push(field);
-						
-					default: haxe.macro.Context.warning("Should not be here", pos);
-				}
-			}
-		}
-		return fields;
-	}
-	
-	
-	public static function createAsyncProxyMethodsFromRemoteClassInternal(remoteClassName : String, 
-		?replaceLastArgWithNodeRelay :Bool = true) :Array<Field>
+	public static function createAsyncProxyMethodsFromRemoteClassInternal(remoteClassName : String) :Array<Field>
 	{
 		var pos = Context.currentPos();
 		var fields = [];
@@ -415,22 +389,25 @@ class Macros
 		fields.push(MacroUtil.createConnectionField(pos));
 		
 		var remoteMetaRegex : EReg = ~/^[ \t]@remote.*/;
-		var functionRegex : EReg = ~/^.*function.*/;
+		var functionRegex : EReg = ~/^[\t ]*(public)?[\t ]*function.*/;
+		var interfaceRegex : EReg = ~/.*\n[\t ]*interface[\t ].*/;
 		var interfaceFunctionExprs = [];
 		
 		var path = Context.resolvePath(remoteClassName.split(".").join("/") + ".hx");
 		
-		var lines = neko.io.File.getContent(path).split("\n");
+		if (!neko.FileSystem.exists(path)) {
+			Context.error("Remoting class '" + remoteClassName + "' does not resolve to a valid path=" + path, pos);
+		}
+		
+		var fileContent = neko.io.File.getContent(path);
+		
+		var isInterface = interfaceRegex.match(fileContent);
+		
+		var lines = fileContent.split("\n");
 		for (ii in 0...lines.length) {
 			
-			if (lines[ii].indexOf("function") > -1) {
-				if (!functionRegex.match(lines[ii])) {
-					Context.warning("Function doesn't match=" + lines[ii], pos);
-				}
-			}
-			
 			if (functionRegex.match(lines[ii])) {
-				if (ii > 0 && (remoteMetaRegex.match(lines[ii - 1]) || lines[ii].indexOf("@remote") > -1)) {
+				if (ii > 0 && (isInterface || ((remoteMetaRegex.match(lines[ii - 1]) || lines[ii].indexOf("@remote") > -1)))) {
 					var parserCompatibleLine = lines[ii].replace("@remote", "").replace("public", "") + "{}";
 					parserCompatibleLine = parserCompatibleLine.trim().replace(";", "");
 					var functionExpr = Context.parse(parserCompatibleLine, pos);
@@ -443,6 +420,9 @@ class Macros
 							var callBackName :String = "cb";
 							var nodeRelayArg = f.args[f.args.length - 1];//FunctionArg
 							
+							if (nodeRelayArg == null) {
+								Context.error("Remote functions must end with a callback or a NodeRelay argument: " + remoteClassName + "." + name, pos);
+							}
 							// Context.warning("nodeRelayArg=" + nodeRelayArg, pos);
 							//Replace function (..., relay :NodeRelay<Foo>) :Void with:
 							//function (..., cb :Foo->Void)
