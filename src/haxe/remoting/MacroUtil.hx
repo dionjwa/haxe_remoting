@@ -6,6 +6,8 @@ import haxe.macro.Expr;
 import haxe.macro.Type;
 import haxe.macro.Context;
 
+using StringTools;
+
 
 class MacroUtil
 {
@@ -35,41 +37,62 @@ class MacroUtil
 			pos: pos
 		}
 	}
+	
 	/**
 	  * If the class has class metadata @remoteId("someId") then "someId" will be used as 
 	  * the remote id on the client and server.  Otherwise, the base class name will be used.
 	  */
-	public static function getRemotingIdFromClassDef (managerClassName :String) :String
+	public static function getRemotingIdFromManagerClassName (managerClassName :String) :String
 	{
-		var pos = Context.currentPos();
-		var managerType = haxe.macro.Context.getType(managerClassName);
+		// var pos = Context.currentPos();
+		var remotingId = managerClassName.replace("Manager", "").replace("Service", "") + "Service";
+		return remotingId.substr(0, 1).toLowerCase() + remotingId.substr(1);
+		// var managerType = haxe.macro.Context.getType(managerClassName);
 		
-		var remotingId = managerClassName.split(".")[managerClassName.split(".").length - 1]; 
-		switch (managerType) {
-			case TInst(t, params):
-				var metaAccess = t.get().meta;
-				var metaData = t.get().meta.get();
-				if (metaData != null) {
-					for (classMeta in metaData) {
-						// Context.warning("classMeta=" + classMeta, pos);
-						if (classMeta.name == "remoteId") {
-							for (metaParam in classMeta.params) {
-								// Context.warning("metaParam=" + metaParam, pos);
-								switch(metaParam.expr) {
-									case EConst(c):
-										switch(c) {
-											case CString(s): remotingId = s;
-											default: Context.warning(SType.enumConstructor(c) + " not handled", pos);
-										}
-									default: Context.warning(SType.enumConstructor(metaParam.expr) + " not handled", pos);
-								}
-							}
-						}
-					}
-				}
-			default: Context.warning(SType.enumConstructor(managerType) + " not handled", pos);
-		}
-		return remotingId;
+		// var remotingId = managerClassName.split(".")[managerClassName.split(".").length - 1]; 
+		// switch (managerType) {
+		// 	case TInst(t, params):
+		// 		var metaAccess = t.get().meta;
+		// 		var metaData = t.get().meta.get();
+		// 		if (metaData != null) {
+		// 			for (classMeta in metaData) {
+		// 				// Context.warning("classMeta=" + classMeta, pos);
+		// 				if (classMeta.name == "remoteId") {
+		// 					for (metaParam in classMeta.params) {
+		// 						// Context.warning("metaParam=" + metaParam, pos);
+		// 						switch(metaParam.expr) {
+		// 							case EConst(c):
+		// 								switch(c) {
+		// 									case CString(s): remotingId = s;
+		// 									default: Context.warning(SType.enumConstructor(c) + " not handled", pos);
+		// 								}
+		// 							default: Context.warning(SType.enumConstructor(metaParam.expr) + " not handled", pos);
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	default: Context.warning(SType.enumConstructor(managerType) + " not handled", pos);
+		// }
+		// return remotingId;
+	}
+	
+	/**
+	  * If the class has class metadata @remoteId("fooService") then "FooService" will be used as 
+	  * the remote id on the client and server.  Otherwise, the base class name will be used, 
+	  * ending with "Service" if it doesn't already.
+	  */
+	public static function getRemotingInterfaceNameFromClassName (managerClassName :String) :String
+	{
+		var remoteId = managerClassName;//getRemotingIdFromClassDef(managerClassName);
+		var tokens = remoteId.split(".");
+		remoteId = tokens[tokens.length - 1];
+		remoteId = remoteId.substr(0, 1).toUpperCase() + remoteId.substr(1);
+		// if (!remoteId.endsWith("Service")) {
+			remoteId += "Service";
+		// }
+		tokens[tokens.length - 1] = remoteId;
+		return tokens.join('.'); 
 	}
 	
 	public static function createNewFunctionBlock (remotingId :String, pos :haxe.macro.Position) :Field
@@ -136,6 +159,7 @@ class MacroUtil
 		switch(classNameExpr.expr) {
 			case EType(e1, field):
 				className = field;
+				// Context.warning(className, Context.currentPos());
 				switch(e1.expr) {
 					case EField(e2, field):
 						className = drillIntoEField(e1) + "." + className;
@@ -152,16 +176,33 @@ class MacroUtil
 			case EConst(c):
 				switch(c) {
 					case CIdent(s):
+						// Context.warning(s, Context.currentPos());
 						className = s;
 					case CString(s):
+						// Context.warning(s, Context.currentPos());
 						className = s;
 					case CType(s):
+						// Context.warning(s, Context.currentPos());
 						className = s;
 					default:Context.warning(SType.enumConstructor(c) + " not handled", Context.currentPos());
 				}
 			default: Context.warning(SType.enumConstructor(classNameExpr.expr) + " not handled", Context.currentPos());
 		}
 		return className;
+	}
+	
+	public static function isInterfaceExpr (typeExpr :Expr) :Bool
+	{
+		switch(typeExpr.expr) {
+			case EType(e1, field):
+				switch(Context.typeof(typeExpr)) {
+					case TType(t, params):
+						return true;
+					default: 
+						return false;
+				}
+			default: return false;
+		}
 	}
 	
 	public static function getProxyRemoteClassName(className : String) :String

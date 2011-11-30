@@ -4,7 +4,7 @@
 
 This package consists of:
 
-1. Node.js remoting connections, one using NodeRelay<T> (thanks Bruno), the other not.
+1. Node.js remoting connections, one using NodeRelay<T> (thanks Bruno Garcia), the other not.
 2. Macros to build async client proxy remoting classes from interfaces or the server remoting class.  All server classes are excluded from the client.
 3. Flash <-> JS asynchronous remoting connection (ExternalAsyncConnection)
 

@@ -1,7 +1,7 @@
 <project name="remoting" url="https://github.com/dionjwa/haxe_remoting" license="BSD">
         <user name="dionjwa"/>
-        <description>Remoting utilities: bi-directional asynchronous remoting, macros to build remoting proxy classes from interfaces and classes.</description>
-        <version name="0.2">Building and getting the proxy class can be done in any order.  Fixed problem with remoting classes in packages.</version>
+        <description>Asynchronous, remoting, and serialization tools.</description>
+        <version name="0.4">Added AsyncLambda.</version>
         <tag v="nodejs"/>
         <tag v="remoting"/>
         <tag v="js"/>

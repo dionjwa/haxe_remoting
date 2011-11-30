@@ -1,0 +1,16 @@
+# Nodejs
+--macro RTTI.generate()
+-debug
+-main UTests
+-lib utest
+-lib robothaxe
+-lib nodejs
+-D nodejs
+-cp ../libdamago/lib/bdog-core
+-cp ../libdamago/lib/bdog-redis
+-cp src
+
+-cp test
+-js build/nodejs_test.js
+
+-cmd node build/nodejs_test.js
