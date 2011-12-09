@@ -39,11 +39,11 @@ class NodeRelay<T>
 
 	public function success (result :T)
 	{
-		try {
+		// try {
 			onSuccess(result);
-		} catch (e :Dynamic) {
-			error(e);
-		}
+		// } catch (e :Dynamic) {
+		// 	error(e + haxe.Stack.toString(haxe.Stack.callStack()));
+		// }
 	}
 
 	public function error (err :Dynamic)
@@ -51,6 +51,9 @@ class NodeRelay<T>
 		if (onError != null) {
 			onError(err);
 		}
+		#if debug
+		trace("Err: " + Std.string(err) + haxe.Stack.toString(haxe.Stack.exceptionStack()));
+		#end
 	}
 
 	public function chain<A> (handler :A -> Void) :NodeRelay<A>

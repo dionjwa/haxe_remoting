@@ -21,6 +21,8 @@ class RedisSerializableClass
 		return _var2;
 	}
 	
+	public var var3 :Array<Int>;
+	
 	function set_var2 (val :Int) :Int
 	{
 		_var2 = val;
@@ -32,6 +34,7 @@ class RedisSerializableClass
 	{
 		var1 = "default";
 		var2 = 0;
+		var3 = [1, 2, 3];
 	}
 	
 	public function toString () :String

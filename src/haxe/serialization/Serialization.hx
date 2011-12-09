@@ -100,36 +100,72 @@ class Serialization
 		var final :Dynamic = null;
 		switch(Type.typeof(o)) {
 			case TNull :final = null;
-			case TClass(kls) :
+			case TClass(kls):
+				
+				if (kls == String || kls == Int || kls == Float || kls == Date) {
+					return o;
+				}
+				// switch (kls) {
+				// 	case String:
+				// 	case Int:
+				// 	case Float:
+				// 	case Date:
+				// 		return o;
+				// 	default:
+				// }
+			
+			
+			
 				var z = {};
 				for (f in Type.getInstanceFields(kls)) {
 					if (MetaUtil.isFieldMetaData(kls, f, "ignore")) {
 						continue;
 					}
+					
 					var val :Dynamic = Reflect.field(o,f);
+
+					// if (f == "_id" && val != null) {
+					// 	Reflect.setField(z, "_id", untyped ObjectId(val)); 
+					// 	continue;
+					// }
+
 					if (val != null && !Reflect.isFunction(val)) {
-					Reflect.setField(z,f,switch(Type.typeof(val)) {
-						case TInt, TBool, TFloat :val;
+					switch(Type.typeof(val)) {
+						case TInt, TBool, TFloat:
+							Reflect.setField(z,f, val);
 						case TClass(c ) :
 							var cn = Type.getClassName(c);
-							if (cn == "Array") {
-								var na = new Array<Dynamic>();
-								if (val != null) {
-									for (el in cast(val,Array<Dynamic>)) {
-										na.push(classToDoc(el));
+							
+							switch (cn) {
+								case "Array":
+									var na = new Array<Dynamic>();
+									if (val != null) {
+										for (el in cast(val,Array<Dynamic>)) {
+											na.push(classToDoc(el));
+										}
 									}
-								}
-								na;
-							} else {
-								if (cn != "String")
-									classToDoc(val);
-								else
-									val;
+									Reflect.setField(z,f, na);
+								case "String":
+									Reflect.setField(z,f, val);
+								case "Date":
+									Reflect.setField(z,f, Date.fromString(Std.string(val)));
+								default:
+									Reflect.setField(z, f, classToDoc(val));
 							}
-						case TEnum(_) : Type.enumConstructor(val);		  
+							
+							// if (cn == "Array") {
+								
+							// } else {
+							// 	if (cn != "String")
+									
+							// 	else
+							// 		val;
+							// }
+						case TEnum(_) : 
+							Reflect.setField(z,f, Type.enumConstructor(val));		  
 						default :
-						val;
-					});
+							Reflect.setField(z,f, val);
+					};
 					}
 				}
 				final = z;
@@ -141,54 +177,84 @@ class Serialization
 		return final;
 	}
 	
-	static function deserClass(o,resolved :Class<Dynamic>) 
+	static function deserClass(o, resolved :Class<Dynamic>, ?newObj :Dynamic) :Dynamic 
 	{
+		// trace("deserClass " + Std.string(o) + ", type=" + Type.getClassName(resolved));
 		// com.pblabs.util.Assert.isNotNull(resolved, " resolved is null");
 		
-		var newObj = Type.createEmptyInstance(resolved);
+		// if (resolved == Int || resolved == Float) {
+		// 	return o;
+		// }
 		
 		var rtti = ReflectUtil.getRttiTypeTree(resolved);
 		if (rtti == null) {
 			// com.pblabs.util.Log.error(Type.getClassName(resolved) + " has no rtti info");
-			return newObj;
+			// if (newObj == null) trace(Type.getClassName(resolved) + " has no rtti info");
+			return newObj != null ? newObj : Type.createEmptyInstance(resolved);
 		}
+		
+		if (newObj == null) {
+			newObj = Type.createEmptyInstance(resolved);
+		}
+		
 		switch(rtti) {
 			case TClassdecl(typeInfo) :
 				Lambda.iter(typeInfo.fields,function(el) {
-					var val = Reflect.field(o,el.name);
-					classFld(newObj,el.name,val,el.type);
+					var val = Reflect.field(o, el.name);
+					// trace('el=' + JSON.stringify(el));
+					classFld(newObj, el.name, val, el.type);
 				});
 			default :
 		}
+		
+		if (Type.getSuperClass(resolved) != null) {
+			// trace("deserializing from superclass, " + Type.getClassName(resolved) + "->" + Type.getClassName(Type.getSuperClass(resolved))); 
+			deserClass(o, Type.getSuperClass(resolved), newObj); 
+		}
+		
 		return newObj;
 	}
 	
-	static function classFld(newObj :Dynamic, name :String, val :Dynamic,el :CType)
+	static function classFld(newObj :Dynamic, name :String, val :Dynamic, el :CType)
 	{
+		if (val == null) {
+			return;
+		}
+		
 		switch(el) {
 			case CClass(kls,subtype) :
 				switch(kls) {
-					case "String","Float","Int":
-		
-						if (name != "_id")
-							Reflect.setField(newObj,name,val);
-						else
-							Reflect.setField(newObj,name,Std.string(val));
-		
+					case "String":
+						Reflect.setField(newObj, name, Std.string(val));
+					case "Float", "Int":
+							Reflect.setField(newObj, name, val);
+					case "Date":
+						Reflect.setField(newObj, name, Date.fromString(Std.string(val)));
 					case "Array":
-						var
-						na = new Array<Dynamic>(),
-						st = subtype.first();
+						var na = [];//new Array<Dynamic>(),
+						var st = subtype.first();
+						// trace("array, first=" + Std.string(st));
 						if (val != null) {
 							for (i in cast(val,Array<Dynamic>)) {
-								switch(st) {
-									case CClass(path,_) :
-										na.push(deserClass(i,Type.resolveClass(path)));
-									case CEnum(enumPath,_) :
-										var e = Type.resolveEnum(enumPath);
-										na.push(Type.createEnum(e,i));
-									default :
-										na.push(i);
+								if (i == null) {
+									na.push(null);
+								} else { 
+									switch(st) {
+										case CClass(path,_):
+											if (path == "Int" || path == "Float" || path == "String") {
+												na.push(i);
+											} else if (path == "Date") {
+												na.push(Date.fromString(Std.string(i)));
+											} else {
+												na.push(deserClass(i,Type.resolveClass(path)));
+											}
+										case CEnum(enumPath,_) :
+											var e = Type.resolveEnum(enumPath);
+											com.pblabs.util.Assert.isNotNull(i);
+											na.push(Type.createEnum(e,i));
+										default :
+											na.push(i);
+									}
 								}
 							}
 						}
@@ -199,17 +265,23 @@ class Serialization
 						Reflect.setField(newObj,name,deserClass(val,Type.resolveClass(kls)));
 				}
 		
-			case CEnum(enumPath,_) :
-				var e = Type.resolveEnum(enumPath);
-				Reflect.setField(newObj,name,Type.createEnum(e,val));
-		
+			case CEnum(enumPath, params) :
+				if (enumPath == "Bool") {
+					Reflect.setField(newObj, name, val);
+				} else {
+					var e = Type.resolveEnum(enumPath);
+					com.pblabs.util.Assert.isNotNull(e, ' e is null');
+					com.pblabs.util.Assert.isNotNull(val, ' val is null');
+					Reflect.setField(newObj, name, Type.createEnum(e, val));
+				}
+				
 			default :
 		//	  trace("other deser type"+el);
 		}
 	}  
 	
-	public static function docToClass(o,myclass :Class<Dynamic>) :Dynamic 
-	{	
+	public static function docToClass(o :Dynamic, myclass :Class<Dynamic>) :Dynamic 
+	{
 		if (o == null) return null;
 		
 		var newObj = Type.createEmptyInstance(myclass);
@@ -317,6 +389,8 @@ class Serialization
 								}
 							case CEnum(enumPath, _):
 								var e = Type.resolveEnum(enumPath);
+								com.pblabs.util.Assert.isNotNull(e, ' e is null');
+								com.pblabs.util.Assert.isNotNull(fieldStringVal, ' fieldStringVal is null');
 								ReflectUtil.setField(obj, fieldName, Type.createEnum(e,fieldStringVal));
 							default : trace("Cannot deserialize type " + fieldMeta.type);
 						}

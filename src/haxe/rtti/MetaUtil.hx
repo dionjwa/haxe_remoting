@@ -11,24 +11,22 @@ class MetaUtil
 {
 	public static function isFieldMetaData (cls :Class<Dynamic>, fieldName :String, metaLabel :String) :Bool
 	{
-		// com.pblabs.util.Assert.isNotNull(cls, "cls is null");
-		// com.pblabs.util.Assert.isNotNull(fieldName, "fieldName is null");
-		// com.pblabs.util.Assert.isNotNull(metaLabel, "metaLabel is null");
-		
 		var meta = haxe.rtti.Meta.getFields(cls);
 		if (meta == null) {
 			return false;
 		}
-		return Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), metaLabel);
+		
+		var hasMeta = Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), metaLabel);
+		if (!hasMeta && Type.getSuperClass(cls) != null) {
+			return isFieldMetaData(Type.getSuperClass(cls), fieldName, metaLabel);
+		} else {
+			return hasMeta;
+		}
 	}
 	
 	/** Assumes we have checked with isFieldMetaData */
 	public static function getFieldMetaData (cls :Class<Dynamic>, fieldName :String, metaLabel :String) :Dynamic
 	{
-		// com.pblabs.util.Assert.isNotNull(cls, "cls is null");
-		// com.pblabs.util.Assert.isNotNull(fieldName, "fieldName is null");
-		// com.pblabs.util.Assert.isNotNull(metaLabel, "metaLabel is null");
-		
 		var meta = haxe.rtti.Meta.getFields(cls);
 		if (meta == null) {
 			return null;
@@ -36,7 +34,11 @@ class MetaUtil
 		if (Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), metaLabel)) {
 			return Reflect.field(Reflect.field(meta, fieldName), metaLabel);
 		} else {
-			return null;
+			if (Type.getSuperClass(cls) != null) {
+				return getFieldMetaData(Type.getSuperClass(cls), fieldName, metaLabel);
+			} else {
+				return null;
+			}
 		}
 	}
 	
