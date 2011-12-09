@@ -4,7 +4,7 @@ using Lambda;
 
 typedef Err->Dynamic;
 
-class AsyncLambda
+class AsyncTools
 {
 	/**
 	  * Asynchronously calls f on the elements of it.  f takes a finish callback for that element, where the argument 
@@ -54,5 +54,20 @@ class AsyncLambda
 			}
 		}
 		asyncCall();
+	}
+	
+	/**
+	  * Converts the function into a Node.js compatible one, where the first arg is an error.
+	  */
+	public static function addErrorArg <T>(f :T->Void, ?onError :Dynamic->Void) :Dynamic->T->Void
+	{
+		return function (err :Dynamic, val :T) :Void {
+			if (err) {
+				if (onError != null) onError(err);
+				f(null);
+			} else {
+				f(val);
+			}
+		}
 	}
 }
