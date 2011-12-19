@@ -1,0 +1,17 @@
+# Nodejs
+--macro RTTI.generate()
+-debug
+
+-main Tests
+
+-lib robothaxe
+-lib nodejs
+-lib html5
+-lib transition9
+
+-D nodejs
+
+-cp src
+-cp test
+
+-js build/nodejs_test.js

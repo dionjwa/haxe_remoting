@@ -14,13 +14,14 @@ See the demo for a working example.
 
 Assume you have a remoting class on the server:
 
-	@remoteId("fooService")
+package foo;
+
 	class FooRemote
 	{
 		@remote
-		public function getTheFoo(fooId :String, relay: NodeRelay<String>) :Void
+		public function getTheFoo(fooId :String, cb :String->Void) :Void
 		{
-			relay.onSuccess("someFoo");
+			cb("someFoo");
 		}
 	}
 	
@@ -29,23 +30,28 @@ On the client, you can construct a fully typed proxy async remoting class with:
 	//Create the remoting Html connection
 	var conn = haxe.remoting.HttpAsyncConnection.urlConnect("http://localhost:8000");
 	
-	//Build and instantiate the proxy class with macros.  The server class is declared here, but NOT compiled into the client.
-	var fooProxy = haxe.remoting.Macros.buildRemoteProxyClass(FooRemote, conn);
+	//Build and instantiate the proxy class with macros.  
+	//The full path to the server class is given as a String, but it is NOT compiled into the client.
+	//It can be given as a class declaration, but then it is compiled into the client (not what you want)
+	var fooProxy = haxe.remoting.Macros.buildRemoteProxyClass("foo.FooRemote", conn);
 	
 	//You can use code completion here
 	fooProxy.getTheFoo(function (foo :String) :Void {
 		trace("successfully got the foo=" + foo);
 	});
 	
-	
-Instead of a remoting class, you can also build the proxy from an interface (also we're not using NodeRelay<T> here):
+Instead of a remoting class, you can also build the proxy from an interface:
 
-	@remoteId("fooService")
 	interface FooRemote
 	{
 		@remote
 		public function getTheFoo(fooId :String, cb :String->Void) :Void;
 	}
+	
+You can also create an interface from the remoting class:
+
+	@:build(haxe.remoting.Macros.addRemoteMethodsToInterfaceFrom("foo.FooRemote"))
+	interface FooService {}
 	
 Then the client proxy class is declared with
 
@@ -54,6 +60,11 @@ Then the client proxy class is declared with
 	
 In the future, you will be able to build and instantiate the interface derived proxy the same as the class derived proxy above.
 
+## Runing the unit tests
+
+There is only one now, more to follow:
+
+	./test/runtests.sh
 
 ## Running the demo
 

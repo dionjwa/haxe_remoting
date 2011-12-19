@@ -161,8 +161,7 @@ class Macros
 	}
 	
 	/**
-	  * Takes a server remoting class and the connection variable, 
-	  * and returns an instance of the newly created proxy class.
+	  * Takes a server remoting class adds the remoting methods to the proxy class.
 	  */
 	@:macro
 	public static function addProxyRemoteMethodsFromClass(classExpr: Expr) :Array<Field>
