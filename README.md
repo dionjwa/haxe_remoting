@@ -14,7 +14,7 @@ See the demo for a working example.
 
 Assume you have a remoting class on the server:
 
-package foo;
+	package foo;
 
 	class FooRemote
 	{

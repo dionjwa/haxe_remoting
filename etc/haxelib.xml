@@ -1,7 +1,7 @@
 <project name="remoting" url="https://github.com/dionjwa/haxe_remoting" license="BSD">
         <user name="dionjwa"/>
         <description>Asynchronous, remoting, and serialization tools.</description>
-        <version name="0.4">Added unit tests.</version>
+        <version name="0.5">Added unit tests.</version>
         <tag v="nodejs"/>
         <tag v="remoting"/>
         <tag v="js"/>
