@@ -36,7 +36,7 @@ On the client, you can construct a fully typed proxy async remoting class with:
 	var fooProxy = haxe.remoting.Macros.buildRemoteProxyClass("foo.FooRemote", conn);
 	
 	//You can use code completion here
-	fooProxy.getTheFoo(function (foo :String) :Void {
+	fooProxy.getTheFoo("fooId", function (foo :String) :Void {
 		trace("successfully got the foo=" + foo);
 	});
 	
