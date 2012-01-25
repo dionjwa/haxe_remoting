@@ -325,8 +325,8 @@ class Macros
 			fields.push(MacroUtil.createConnectionField(pos));
 		}
 		
-		var remoteMetaRegex : EReg = ~/^[ \t]@remote.*/;
-		var functionRegex : EReg = ~/^[\t ]*(public)?[\t ]*function.*/;
+		var remoteMetaRegex : EReg = ~/^[ \t]*@remote.*/;
+		var functionRegex : EReg = ~/[\t ]*(public)?[\t ]*function.*/;
 		var interfaceRegex : EReg = ~/.*\n[\t ]*interface[\t ].*/;
 		var interfaceFunctionExprs = [];
 		
