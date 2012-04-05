@@ -1,10 +1,8 @@
 # Nodejs
---macro RTTI.generate()
 -debug
 
 -main Tests
 
--lib robothaxe
 -lib nodejs
 -lib html5
 -lib transition9
