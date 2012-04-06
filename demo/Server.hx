@@ -11,8 +11,6 @@ class Server
 {
 	public static function main ()
 	{
-		
-		
 		createNonRelayConnection();
 		createNodeRelayConnection();
 	}
