@@ -56,13 +56,14 @@ You can also create an interface from the remoting class:
 Then the client proxy class is declared with
 
 	@:build(haxe.remoting.Macros.buildAsyncProxyClassFromInterface(FooRemote))
+	//Or @:build(haxe.remoting.Macros.buildAsyncProxyClassFromInterface("foo.FooRemote"))
 	class FooProxy implements IRemotingService {}:
 	
 In the future, you will be able to build and instantiate the interface derived proxy the same as the class derived proxy above.
 
 ## Runing the unit tests
 
-There is only one now, more to follow:
+There are two unit tests:
 
 	./test/runtests.sh
 
