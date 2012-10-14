@@ -44,37 +44,8 @@ class MacroUtil
 	  */
 	public static function getRemotingIdFromManagerClassName (managerClassName :String) :String
 	{
-		// var pos = Context.currentPos();
 		var remotingId = managerClassName.replace("Manager", "").replace("Service", "") + "Service";
 		return remotingId.substr(0, 1).toLowerCase() + remotingId.substr(1);
-		// var managerType = haxe.macro.Context.getType(managerClassName);
-		
-		// var remotingId = managerClassName.split(".")[managerClassName.split(".").length - 1]; 
-		// switch (managerType) {
-		// 	case TInst(t, params):
-		// 		var metaAccess = t.get().meta;
-		// 		var metaData = t.get().meta.get();
-		// 		if (metaData != null) {
-		// 			for (classMeta in metaData) {
-		// 				// Context.warning("classMeta=" + classMeta, pos);
-		// 				if (classMeta.name == "remoteId") {
-		// 					for (metaParam in classMeta.params) {
-		// 						// Context.warning("metaParam=" + metaParam, pos);
-		// 						switch(metaParam.expr) {
-		// 							case EConst(c):
-		// 								switch(c) {
-		// 									case CString(s): remotingId = s;
-		// 									default: Context.warning(SType.enumConstructor(c) + " not handled", pos);
-		// 								}
-		// 							default: Context.warning(SType.enumConstructor(metaParam.expr) + " not handled", pos);
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	default: Context.warning(SType.enumConstructor(managerType) + " not handled", pos);
-		// }
-		// return remotingId;
 	}
 	
 	/**
@@ -186,8 +157,13 @@ class MacroUtil
 						className = s;
 					default:Context.warning(SType.enumConstructor(c) + " not handled", Context.currentPos());
 				}
+			case EField(e, field):
+				className = drillIntoEField(e) + "." + field;
 			default: Context.warning(SType.enumConstructor(classNameExpr.expr) + " not handled", Context.currentPos());
 		}
+		
+		// Context.warning("className=" + className, Context.currentPos());
+		
 		return className;
 	}
 	

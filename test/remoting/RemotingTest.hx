@@ -50,4 +50,40 @@ class RemotingTest
 		}
 		Assert.isTrue(totalRemotingFields == 2);
 	}
+	
+	/**
+	  * Make sure the interface has all the methods in the remoting
+	  * class with a @remote metadata label.
+	  */
+	@Test
+	public function testBuildingRemotingClientClass():Void
+	{
+		var meta = haxe.rtti.Meta.getFields(RemotingManager);
+		Assert.isNotNull(meta);
+		var totalRemotingFields = 0;
+		
+		var remotingClientInstance = 
+			haxe.remoting.Macros.buildAndInstantiateRemoteProxyClass(
+				"remoting.buildInterfaceSupport.RemotingManager",
+				new DummyConnection());
+				
+		var remotingClass = Type.getClass(remotingClientInstance);
+		
+		for (fieldName in Type.getInstanceFields(RemotingManager)) {
+			if (Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), "remote")) {
+				Assert.isTrue(Type.getInstanceFields(remotingClass).has(fieldName));
+				totalRemotingFields++;
+			}
+		}
+		Assert.isTrue(totalRemotingFields == 2);
+	}
+}
+
+class DummyConnection 
+	implements haxe.remoting.AsyncConnection
+{
+	public function new() {}
+	public function call( params : Array<Dynamic>, ?result : Dynamic -> Void ) : Void {}
+	public function resolve( name : String ) : haxe.remoting.AsyncConnection {return null;}
+	public function setErrorHandler( error : Dynamic -> Void ) : Void {}
 }
