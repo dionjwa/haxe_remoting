@@ -1,11 +1,12 @@
 # Nodejs
 -debug
-
+-D server
 -main Tests
 
 -lib nodejs
 -lib html5
 -lib transition9
+-lib flambe
 
 -D nodejs
 

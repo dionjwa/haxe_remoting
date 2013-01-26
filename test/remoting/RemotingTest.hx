@@ -1,11 +1,12 @@
 package remoting;
 
-import js.Node;
+import flambe.util.Assert;
 
-import org.transition9.util.Assert;
+import js.Node;
 
 import remoting.buildInterfaceSupport.BuiltRemotingService;
 import remoting.buildInterfaceSupport.RemotingManager;
+import transition9.remoting.RemotingUtil;
 
 using Lambda;
 
@@ -40,15 +41,15 @@ class RemotingTest
 	public function testBuildingRemotingInterface():Void
 	{
 		var meta = haxe.rtti.Meta.getFields(RemotingManager);
-		Assert.isNotNull(meta);
+		Assert.that(meta != null);
 		var totalRemotingFields = 0;
 		for (fieldName in Type.getInstanceFields(RemotingManager)) {
 			if (Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), "remote")) {
-				Assert.isTrue(Type.getInstanceFields(BuiltRemotingService).has(fieldName));
+				Assert.that(Type.getInstanceFields(BuiltRemotingService).has(fieldName));
 				totalRemotingFields++;
 			}
 		}
-		Assert.isTrue(totalRemotingFields == 2);
+		Assert.that(totalRemotingFields == 2);
 	}
 	
 	/**
@@ -59,11 +60,11 @@ class RemotingTest
 	public function testBuildingRemotingClientClass():Void
 	{
 		var meta = haxe.rtti.Meta.getFields(RemotingManager);
-		Assert.isNotNull(meta);
+		Assert.that(meta != null);
 		var totalRemotingFields = 0;
 		
 		var remotingClientInstance = 
-			haxe.remoting.Macros.buildAndInstantiateRemoteProxyClass(
+			transition9.remoting.Macros.buildAndInstantiateRemoteProxyClass(
 				"remoting.buildInterfaceSupport.RemotingManager",
 				new DummyConnection());
 				
@@ -71,11 +72,22 @@ class RemotingTest
 		
 		for (fieldName in Type.getInstanceFields(RemotingManager)) {
 			if (Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), "remote")) {
-				Assert.isTrue(Type.getInstanceFields(remotingClass).has(fieldName));
+				Assert.that(Type.getInstanceFields(remotingClass).has(fieldName));
 				totalRemotingFields++;
 			}
 		}
-		Assert.isTrue(totalRemotingFields == 2);
+		Assert.that(totalRemotingFields == 2);
+	}
+	
+	/**
+	  * Make sure the build remoting server class has the added static fields
+	  */
+	@Test
+	public function testBuildingRemotingManager():Void
+	{
+		var cls = RemotingManager;
+		Assert.that(Reflect.field(RemotingManager, RemotingUtil.REMOTING_ID_NAME) != null);
+		Assert.that(Reflect.field(RemotingManager, RemotingUtil.REMOTING_INTERFACE_NAME) != null);
 	}
 }
 

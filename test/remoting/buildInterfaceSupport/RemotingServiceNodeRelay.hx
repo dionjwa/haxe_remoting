@@ -1,5 +1,6 @@
 package remoting.buildInterfaceSupport;
 
+import flambe.server.NodeRelay;
 /**
   * This remoting class does not use interfaces.  The client proxy is built via:
   *
@@ -11,7 +12,7 @@ package remoting.buildInterfaceSupport;
 		levelsProxy.getAllLevelNames(cb);
   */
 
-@remoteId("fooService")
+@:build(transition9.remoting.Macros.remotingClass(true))
 class RemotingServiceNodeRelay
 	implements BuiltRemotingInterface
 {
@@ -20,14 +21,14 @@ class RemotingServiceNodeRelay
 	}
 	
 	@remote
-	public function getFoos (relay: haxe.remoting.NodeRelay<Array<String>>) :Void
+	public function getFoos (relay: flambe.server.NodeRelay<Array<String>>) :Void
 	{
 		relay.success(["foo1", "foo2", "foo3"]);
 	}
 
 	
 	@remote
-	public function getFoo (fooName :String, relay: haxe.remoting.NodeRelay<String>) :Void
+	public function getFoo (fooName :String, relay: flambe.server.NodeRelay<String>) :Void
 	{
 		relay.success("foo1");
 	}

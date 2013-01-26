@@ -1,4 +1,7 @@
-package haxe.remoting;
+package transition9.remoting;
+
+import haxe.remoting.AsyncConnection;
+import haxe.remoting.Context;
 
 /**
 	Asynchronous (both sides) communication between Flash and Javascript.

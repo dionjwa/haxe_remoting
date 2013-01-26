@@ -1,4 +1,7 @@
-package haxe.remoting;
+package transition9.remoting;
+
+import haxe.remoting.Connection;
+import haxe.remoting.Context;
 
 /**
   * For dummying up remoting connections locally.

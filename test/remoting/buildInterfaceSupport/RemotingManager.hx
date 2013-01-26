@@ -11,9 +11,8 @@ package remoting.buildInterfaceSupport;
 		levelsProxy.getAllLevelNames(cb);
   */
 
-@remoteId("fooService")
+@:build(transition9.remoting.Macros.remotingClass())
 class RemotingManager
-	implements BuiltRemotingService
 {
 	public function new ()
 	{

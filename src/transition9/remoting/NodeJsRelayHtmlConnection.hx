@@ -6,13 +6,19 @@
  * This file is licensed under the terms of the MIT license, which is included
  * in the License.html file at the root directory of this SDK.
  ******************************************************************************/
-package haxe.remoting;
+package transition9.remoting;
 
 #if !js
 #error
 #end
 
+#if !flambe
+#error
+#end
+
 import haxe.remoting.Context;
+
+import flambe.server.NodeRelay;
 
 import js.Node;
 
@@ -55,7 +61,7 @@ class NodeJsRelayHtmlConnection
 			req.removeAllListeners("end");
 			
 			var relay = new NodeRelay(function (data :Dynamic) {
-				res.end("hxr" + Serializer.run(data));
+				res.end("hxr" + haxe.Serializer.run(data));
 			});
 			
 			relay.onError = function (err :Dynamic) {

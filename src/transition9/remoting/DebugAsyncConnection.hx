@@ -1,4 +1,10 @@
-package haxe.remoting;
+package transition9.remoting;
+
+import haxe.remoting.AsyncConnection;
+import haxe.remoting.Context;
+#if flambe
+import flambe.util.Assert;
+#end
 
 /**
   * For dummying up remoting connections locally.
@@ -43,7 +49,6 @@ class DebugAsyncConnection
 	
 	static function doCall(path : Array<String>, params : String, cb :String->Void) : Void 
 	{
-		// try {
 			var params :Array<Dynamic> = new haxe.Unserializer(params).unserialize();
 			var isCallback :Bool = params.pop();
 			if (isCallback) {
@@ -54,14 +59,9 @@ class DebugAsyncConnection
 				}
 				params.push(localCallback);
 			}
-			org.transition9.util.Assert.isNotNull(serverContext, "No serverContext??");
+			#if flambe
+			Assert.that(serverContext != null, "No serverContext??");
+			#end
 			serverContext.call(path, params);
-		// } catch( e : Dynamic ) {
-		// 	trace(e + " path=" + path + " " + org.transition9.util.Log.getStackTrace());
-		// 	trace('serverContext=' + serverContext);
-		// 	var s = new haxe.Serializer();
-		// 	s.serializeException(e);
-		// 	cb(s.toString());
-		// }
 	}
 }

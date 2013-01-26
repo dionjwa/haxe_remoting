@@ -1,4 +1,7 @@
 [haxe]: http://http://haxe.org
+[flambe]:http://lib.haxe.org/p/flambe
+[wafl]:https://github.com/aduros/flambe/wiki/Wafl
+[nodejs]:http://nodejs.org/
 
 # Asynchronous remoting classes for [Haxe][haxe]
 
@@ -10,12 +13,38 @@ This package consists of:
 
 See the demo for a working example.
 
-## Usage
+## Installation/compilation
+
+To build the demos:
+
+1. [Install node.js][nodejs].
+1. [Install flambe](https://github.com/aduros/flambe/wiki/Installation).
+2. Configure and run wafl (in the library root):
+
+	wafl configure --debug
+	wafl install
+	
+	
+To run the remoting demo:
+
+- In one terminal window run the server:
+	
+	node deploy/remoting-server-server/remoting-server.js
+
+- In another terminal window, run the client:
+	
+	node deploy/remoting-client-server/remoting-client.js
+	
+In the client window, type a number and then enter.  The server sends back a processed result.
+
+
+## Usage (building your own remoting classes)
 
 Assume you have a remoting class on the server:
 
 	package foo;
 
+	@:build(haxe.remoting.Macros.remotingClass())
 	class FooRemote
 	{
 		@remote
@@ -33,7 +62,7 @@ On the client, you can construct a fully typed proxy async remoting class with:
 	//Build and instantiate the proxy class with macros.  
 	//The full path to the server class is given as a String, but it is NOT compiled into the client.
 	//It can be given as a class declaration, but then it is compiled into the client (not what you want)
-	var fooProxy = haxe.remoting.Macros.buildRemoteProxyClass("foo.FooRemote", conn);
+	var fooProxy = haxe.remoting.Macros.buildAndInstantiateRemoteProxyClass(foo.FooRemote, conn);
 	
 	//You can use code completion here
 	fooProxy.getTheFoo("fooId", function (foo :String) :Void {
@@ -61,21 +90,12 @@ Then the client proxy class is declared with
 	
 In the future, you will be able to build and instantiate the interface derived proxy the same as the class derived proxy above.
 
-## Runing the unit tests
+## Running the unit tests
 
 There are two unit tests:
 
 	./test/runtests.sh
-
-## Running the demo
-
-You need the following npm modules: connect
-Then:
-
-	haxe etc/build.hxml
 	
-	node server.js
-	
-Then navigate to http://localhost:8000 and http://localhost:8001
+## Coming soon:
 
-Both should show 1 error and 1 success.  Yeah, this demo could be better.
+Websockets.
