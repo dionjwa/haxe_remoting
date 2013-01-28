@@ -60,8 +60,7 @@ On the client, you can construct a fully typed proxy async remoting class with:
 	var conn = haxe.remoting.HttpAsyncConnection.urlConnect("http://localhost:8000");
 	
 	//Build and instantiate the proxy class with macros.  
-	//The full path to the server class is given as a String, but it is NOT compiled into the client.
-	//It can be given as a class declaration, but then it is compiled into the client (not what you want)
+	//The full path to the server class is given as the first argument, but it is NOT compiled into the client by default
 	var fooProxy = haxe.remoting.Macros.buildAndInstantiateRemoteProxyClass(foo.FooRemote, conn);
 	
 	//You can use code completion here
@@ -79,7 +78,7 @@ Instead of a remoting class, you can also build the proxy from an interface:
 	
 You can also create an interface from the remoting class:
 
-	@:build(haxe.remoting.Macros.addRemoteMethodsToInterfaceFrom("foo.FooRemote"))
+	@:build(haxe.remoting.Macros.addRemoteMethodsToInterfaceFrom(foo.FooRemote))
 	interface FooService {}
 	
 Then the client proxy class is declared with

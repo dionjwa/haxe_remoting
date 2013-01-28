@@ -6,15 +6,11 @@
 -D server
 
 -lib nodejs
-# -lib transition9
 -lib flambe
 -lib nodejs_externs
 
-# -cp ../flambe_pbmigration/src
 -cp src
 -cp demo/src
-
-
 
 -js build/test_server.js
 
