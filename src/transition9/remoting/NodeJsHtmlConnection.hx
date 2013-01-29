@@ -48,11 +48,7 @@ class NodeJsHtmlConnection
 	public function handleRequest (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool 
 	{
 		if (req.method != "POST" || req.headers[untyped "x-haxe-remoting"] != "1") {
-			if (_allowHttpUrlApi) {
-				return handleJsonRequest(req, res);
-			} else {
 				return false;
-			}
 		}
 		
 		//Get the POST data
@@ -113,73 +109,4 @@ class NodeJsHtmlConnection
 		});
 		return true;
 	}
-	
-	public function handleJsonRequest (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool 
-	{
-		res.setHeader("Content-Type", "application/json");
-		req.addListener("end", function() {
-			req.removeAllListeners("end");
-			try {
-				var parsedUrl = Node.url.parse(req.url, true);
-				var path = parsedUrl.pathname.substr(1).split("/");
-				var args :Array<Dynamic> = [];
-				if (parsedUrl.query != null) {
-					var keys = [];
-					for(key in Reflect.fields(parsedUrl.query)) {
-						if (key.startsWith("arg")) {
-							keys.push(key);
-						}
-					}
-					keys.sort(compareStrings);
-					for(key in keys) {
-						args.push(Reflect.field(parsedUrl.query, key));
-					}
-					//Try to convert args to the right type.  Only simple args work
-					for (i in 0...args.length) {
-						var x :Float = Std.parseFloat(args[i]);
-						if (Math.isNaN(x)) {
-							var z :Int = Std.parseInt(args[i]);
-							if (!Math.isNaN(x)) {
-								args[i] = x;
-							}
-						} else {
-							args[i] = x;
-						}
-					}
-				}
-				
-				res.writeHead(200);
-				var cb = function (data :Dynamic) {
-					res.end('{"status": "success",  "result": ' + Node.stringify(data) + '}');
-				};
-				args.push(cb);
-				_context.call(path, args);
-			} catch (e :Dynamic) {
-				var message = (e.message != null) ? e.message : e;
-				var stack = e.stack;
-
-				#if flambe
-				Log.error("Remoting exception: " +
-					(e.stack != null ? e.stack : message));
-				#else
-				trace("Remoting exception: " +
-					(e.stack != null ? e.stack : message));
-				#end
-				res.writeHead(200);
-				res.end('{"status": "error",  "error": "' + message + '"}');
-			}
-		});
-		return true;
-	}
-	
-	private static function compareStrings(a :String, b :String) :Int 
-	{
-		a = a.toLowerCase();
-		b = b.toLowerCase();
-		if (a < b) return -1;
-		if (a > b) return 1;
-		return 0;
-	}
-	
-	// private static var urlQuery = Node.require("url");
 }

@@ -16,7 +16,16 @@ class MiddlewareBuilder
 	public function new ()
 	{
 		_context = new Context();
-		_serviceHandler = new NodeJsHtmlConnection(_context, true);
+		#if debug
+		#else
+		#end
+		_serviceHandler = new NodeJsHtmlConnection(_context);
+	}
+	
+	public function allowJsonFallback () :MiddlewareBuilder
+	{
+		_serviceHandler = new NodeJsHtmlConnectionJsonFallback(_context);
+		return this;	
 	}
 	
 	public function addRemotingManager (remotingInstance :Dynamic) :MiddlewareBuilder

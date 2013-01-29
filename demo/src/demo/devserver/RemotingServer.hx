@@ -16,6 +16,7 @@ class RemotingServer
 		transition9.remoting.ExternalAsyncConnection;
 		transition9.remoting.MiddlewareBuilder;
 		transition9.remoting.NodeJsHtmlConnection;
+		transition9.remoting.NodeJsHtmlConnectionJsonFallback;
 		// demo.devserver.RemotingClient;
 		#if flambe
 		transition9.remoting.NodeJsRelayHtmlConnection;
@@ -39,6 +40,9 @@ class RemotingServer
 				//Add our example service
 				.addRemotingManager(new demo.devserver.ExampleRemotingService())
 				//Add more services here
+				//.addRemotingManager(new your.CustomRemotingService())
+				//Allow calling remoting services with url args and getting json back, useful for testing/debugging
+				.allowJsonFallback()//
 				.buildConnectMiddleware()//This can be checked quickly
 		).listen(program.port, 'localhost');
 		trace("Server listening on localhost:" + program.port);
