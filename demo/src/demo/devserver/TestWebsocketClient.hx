@@ -4,7 +4,7 @@ import transition9.remoting.NodeJsHtmlConnection;
 import js.node.WebSocketNode;
 import js.Node;
 
-class WebsocketClient
+class TestWebsocketClient
 {
 	public static function main()
 	{

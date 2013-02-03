@@ -29,7 +29,7 @@ class Macros
 	/**
 	 * Usage:
 	 * 
-     * @:build(haxe.remoting.Macros.remotingClass())
+     * @:build(transition9.remoting.Macros.remotingClass())
      * class YourServerRemotingClass {
      *
      * This will add the following static var fields to the class:
@@ -37,7 +37,7 @@ class Macros
      * 										 methods (functions with the @remote metadata) of this class
      * 
      * REMOTING_ID: Used internally by the remoting system.
-     * @convertNodeRelayArgs Whether to convert the callback arg to a NoeRelay object.
+     * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
      */
 	@:macro
 	public static function remotingClass(?convertNodeRelayArgs :Bool = false) :Array<Field>
@@ -213,6 +213,65 @@ class Macros
 		
 		// var remotingId = RemotingUtil.getRemotingIdFromManagerClassName(getClassNameFromClassExpr(classExpr));
 		// return { expr : EConst(CString(remotingId)), pos : Context.currentPos() };
+	}
+	
+	/**
+	 * Websocket build macro
+	  * Adds custom serialization functions 
+	  * http://haxe.org/manual/serialization
+	  * for all fields with the annotation @serialize
+	  */
+	@:macro
+	public static function buildWebsocketMessage() :Array<Field>
+	{
+		if (Context.defined("display")) {
+			// When running in code completion, skip out early
+			return haxe.macro.Context.getBuildFields();
+		}
+		
+		var pos = Context.currentPos();
+		
+		var cls = Context.getLocalClass().get();
+		
+		var serializableFieldNames = [];
+		
+		var classfields :Array<ClassField> = transition9.util.MacroUtil.getAllClassFields(cls.superClass.t.get());
+		
+		if (classfields != null) {
+			for (classField in classfields) {
+				if (classField.meta.has("serialize")) {
+					serializableFieldNames.push(classField.name);
+				}
+			}
+		}
+		
+		var buildFields = haxe.macro.Context.getBuildFields();
+		
+		for (f in buildFields) {
+			if (f.meta != null) {
+				for (m in f.meta) {
+					if (m.name == "serialize") {
+						serializableFieldNames.push(f.name);
+						break;
+					}
+				}
+			}
+		}
+		
+		var serializeExpressions = [];
+		var unserializeExpressions = [];
+		for (field in serializableFieldNames) {
+			serializeExpressions.push(Context.parse("s.serialize(" + field + ")", pos));
+			unserializeExpressions.push(Context.parse(field + " = s.unserialize()", pos));
+		}
+		
+		var serializeBlock = {expr:ExprDef.EBlock(serializeExpressions), pos :pos};
+		var unserializeBlock = {expr:ExprDef.EBlock(unserializeExpressions), pos :pos};
+		
+		return haxe.macro.Context.getBuildFields().concat(flambe.util.Macros.buildFields(macro {
+			function public__hxSerialize(s: haxe.Serializer) {$serializeBlock;}
+			function public__hxUnserialize(s: haxe.Unserializer) {$unserializeBlock;}
+		}));
 	}
 	
 	/**

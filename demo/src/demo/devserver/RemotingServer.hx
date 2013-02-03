@@ -18,6 +18,7 @@ class RemotingServer
 		transition9.remoting.NodeJsHtmlConnection;
 		transition9.remoting.NodeJsHtmlConnectionJsonFallback;
 		// demo.devserver.RemotingClient;
+		transition9.websockets.WebsocketClient;
 		#if flambe
 		transition9.remoting.NodeJsRelayHtmlConnection;
 		#end

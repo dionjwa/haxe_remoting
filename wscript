@@ -23,7 +23,7 @@ def build(ctx):
 		npm_libs="connect commander",
 		main="demo.devserver.RemotingServer",
 		classpath=classpaths,
-		libs="flambe nodejs nodejs_externs",
+		libs="flambe nodejs nodejs_externs transition9",
 		target="remoting-server.js")
 		
 	ctx(name="remoting-client", 
@@ -31,21 +31,21 @@ def build(ctx):
 		npm_libs="connect commander",
 		main="demo.devserver.RemotingClient",
 		classpath=classpaths,
-		libs="flambe nodejs nodejs_externs",
+		libs="flambe nodejs nodejs_externs transition9",
 		target="remoting-client.js")
 		
-	# ctx(name="websocket-server", 
-	# 	features="flambe-server",
-	# 	npm_libs="connect commander websocket",
-	# 	main="demo.devserver.WebsocketServer",
-	# 	classpath=classpaths,
-	# 	libs="flambe nodejs transition9 nodejs_externs",
-	# 	target="websocket-server.js")
+	ctx(name="websocket-server", 
+		features="flambe-server",
+		npm_libs="commander websocket",
+		main="demo.devserver.TestWebsocketRouter",
+		classpath=classpaths,
+		libs="flambe nodejs transition9 nodejs_externs",
+		target="websocket-server.js")
 		
-	# ctx(name="websocket-client", 
-	# 	features="flambe-server",
-	# 	npm_libs="connect commander websocket",
-	# 	main="demo.devserver.WebsocketClient",
-	# 	classpath=classpaths,
-	# 	libs="flambe nodejs transition9 nodejs_externs",
-	# 	target="websocket-client.js")
+	ctx(name="websocket-client", 
+		features="flambe-server",
+		npm_libs="commander websocket",
+		main="demo.devserver.TestWebsocketRouterClient",
+		classpath=classpaths,
+		libs="flambe nodejs transition9 nodejs_externs",
+		target="websocket-client.js")

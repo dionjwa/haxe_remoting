@@ -5,7 +5,7 @@ import js.node.WebSocketNode;
 
 using org.transition9.util.ArrayUtil;
 
-class WebsocketServer
+class TestWebsocketServer
 {
 	public static function main()
 	{

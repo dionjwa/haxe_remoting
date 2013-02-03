@@ -25,17 +25,9 @@ using StringTools;
 class NodeJsHtmlConnection
 {
 	var _context :Context;
-	/** 
-	  * If true, you can use e.g. [baseurl]/serviceName/apifunction?arg1=foo&arg2=314
-	  * for calling your API as well as the regular haxe remoting calls.  Useful for 
-	  * testing in the browser. Returns json instead of a haxe object.
-	  * Node the lower case of the serviceName.
-	  */
-	var _allowHttpUrlApi :Bool;
 	
-	public function new (ctx :Context, ?allowHttpUrlApi :Bool = false)
+	public function new (ctx :Context)
 	{
-		_allowHttpUrlApi = allowHttpUrlApi;
 		_context = ctx;
 	}
 	
