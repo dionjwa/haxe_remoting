@@ -9,7 +9,7 @@
 -lib flambe
 -lib nodejs_externs
 -lib html5
--lib node-std
+-lib nodejs-std
 
 -cp src
 -cp demo/src

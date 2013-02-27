@@ -42,7 +42,11 @@ class Messages
 				return JSON.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));
 				#end
 			} catch (e :Dynamic) {
-				Log.error("Error parsing json object: " + message + ", e=" + e);
+				#if flambe
+					Log.error("Error parsing json object: " + message + ", e=" + e);
+				#else
+					trace("Error parsing json object: " + message + ", e=" + e);
+				#end
 				return null;
 			}
 		#else
