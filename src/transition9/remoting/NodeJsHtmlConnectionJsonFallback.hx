@@ -49,29 +49,36 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 				var parsedUrl = Node.url.parse(req.url, true);
 				var path = parsedUrl.pathname.substr(1).split("/");
 				var args :Array<Dynamic> = [];
-				if (parsedUrl.query != null) {
-					var keys = [];
-					for(key in Reflect.fields(parsedUrl.query)) {
-						if (key.startsWith("arg")) {
-							keys.push(key);
-						}
-					}
-					keys.sort(compareStrings);
-					for(key in keys) {
-						args.push(Reflect.field(parsedUrl.query, key));
-					}
-					//Try to convert args to the right type.  Only simple args work
-					for (i in 0...args.length) {
-						var x :Float = Std.parseFloat(args[i]);
-						if (Math.isNaN(x)) {
-							var z :Int = Std.parseInt(args[i]);
-							if (!Math.isNaN(x)) {
-								args[i] = x;
+				try {
+					if (parsedUrl != null) {
+							
+						if (parsedUrl.query != null) {
+							var keys = [];
+							for(key in Reflect.fields(parsedUrl.query)) {
+								if (key.startsWith("arg")) {
+									keys.push(key);
+								}
 							}
-						} else {
-							args[i] = x;
+							keys.sort(compareStrings);
+							for(key in keys) {
+								args.push(Reflect.field(parsedUrl.query, key));
+							}
+							//Try to convert args to the right type.  Only simple args work
+							for (i in 0...args.length) {
+								var x :Float = Std.parseFloat(args[i]);
+								if (Math.isNaN(x)) {
+									var z :Int = Std.parseInt(args[i]);
+									if (!Math.isNaN(x)) {
+										args[i] = x;
+									}
+								} else {
+									args[i] = x;
+								}
+							}
 						}
 					}
+				} catch (e :Dynamic) {
+					Log.error(e);
 				}
 				
 				res.writeHead(200);

@@ -9,18 +9,14 @@
 -lib flambe
 -lib nodejs_externs
 -lib html5
--lib transition9
+-lib node-std
 
 -cp src
 -cp demo/src
 
 -js build/test_server.js
 
-#This class also compiles all the others not directly used.
-# -main demo.devserver.RemotingClient
-# -main demo.devserver.RemotingServer
-# -main transition9.websockets.WebsocketRouter
-
--main demo.devserver.TestWebsocketRouter
+#Compile all classes
+-main demo.devserver.CompileAll
 
 

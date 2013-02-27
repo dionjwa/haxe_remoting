@@ -1,22 +1,37 @@
 package transition9.websockets;
 
-import haxe.Serializer;
-import haxe.Unserializer;
+
+#if macro
+import haxe.macro.Expr;
+import haxe.macro.Context;
+#end
 
 import flambe.util.SignalConnection;
 import flambe.util.Signal1;
 import flambe.util.Assert;
 
+import haxe.Serializer;
+import haxe.Unserializer;
+
+import transition9.websockets.Messages;
+
+using StringTools;
+
 #if nodejs
-import js.Node;
-import js.node.WebSocketNode;
+	#if !macro
+		import js.Node;
+		import js.node.WebSocketNode;
+	#else
+		typedef WebSocketConnection = {}
+	#end
+	
 #else
 	#if !html5
 	#error
 	#end
 #end
 
-class WebsocketClient extends WebsocketMessageHandler
+class WebsocketClient
 {
 	public var clientId (default, null) :String;
 	public var connected (default, null) :Signal1<WebsocketClient>;
@@ -24,81 +39,284 @@ class WebsocketClient extends WebsocketMessageHandler
 	
 	var _messageSignal :Signal1<Dynamic>;
 	var _ws_address :String;
-	#if nodejs
+	#if (nodejs && !macro)
 	var _connection :WebSocketConnection;
 	var _client :js.node.WebSocketNode.WebSocketClient;
-	#else
+	#elseif html5
+	var _connection :WebSocket;
 	#end
 	
-	public function new (ws_address :String, ?clientId :String)
+	var _messageSignals :Map<String, Signal1<Dynamic>>;
 	
+	public function new (ws_address :String, ?clientId :String)
 	{
-		super();
+		_messageSignals = new Map<String, Signal1<Dynamic>>();
 		this.connected = new Signal1();
 		this.disconnected = new Signal1();
 		this.clientId = clientId;
 		_ws_address = ws_address;
-		#if nodejs
-		var WebSocketClient = Node.require('websocket').client;
-		var clientConfig :WebSocketClientConfig = {};
-		_client = untyped __js__("new WebSocketClient([clientConfig])");
-		connect();
-		#else
+		#if !macro
+			#if nodejs
+			var WebSocketClient = Node.require('websocket').client;
+			var clientConfig :WebSocketClientConfig = {};
+			_client = untyped __js__("new WebSocketClient([clientConfig])");
+			connect();
+			#else
+			Log.info("New WebSocket", ["url", _ws_address, "protocols", Constants.WEBSOCKET_PROTOCOL]);
+			_connection = new WebSocket(_ws_address, Constants.WEBSOCKET_PROTOCOL);
+			_connection.onopen = onConnect;
+			#end
 		#end
 		_messageSignal = new Signal1();
 	}
 	
-	override public function sendMessage (msg :Dynamic, ?clientIds :Array<String> = null) :Void
+	public function registerClient (clientId :String) :Void
 	{
-		Assert.that(_connection != null);
-		var serializedMessage :String = Serializer.run(msg);
-		_connection.sendUTF(serializedMessage);
+		#if !macro
+		if (_connection != null) {
+			if (clientId != null) {
+				this.clientId = clientId;
+				Log.info("Sending client registration (clientId=" + clientId + ")");
+				#if nodejs
+				_connection.sendUTF(Constants.PREFIX_REGISTER_CLIENT + clientId);
+				#elseif html5
+				_connection.send(Constants.PREFIX_REGISTER_CLIENT + clientId);
+				#end
+			} else {
+				Log.error("Cannot register client, clientId==null");
+			}
+		} else {
+			Log.error("Cannot register client, _connection==null");
+		}
+		#end
+	}
+	
+	public function registerMessageHandlerById (messageId :String, handler :Dynamic->Void) :SignalConnection
+	{
+		// #if !macro
+		// Log.info("registerMessageHandler", ["messageId", messageId]);
+		// #end
+		if (!_messageSignals.exists(messageId)) {
+			_messageSignals.set(messageId, new Signal1<Dynamic->Void>());
+		}
+		return _messageSignals.get(messageId).connect(handler);
+	}
+	
+	public function registerMessageHandlerByClass <T> (cls :Class<T>, handler :T->Void) :SignalConnection
+	{
+		return registerMessageHandlerById(Type.getClassName(cls), handler);
+	}
+	
+	//Rewrites into registerMessageHandlerById(Type.getClassName(T), cb);
+	// macro public function registerMessageHandler <T> (self :Expr, cb :ExprRequire<T->Void>)
+	macro public function registerMessageHandler <T> (self :Expr, cb :Expr)
+	{
+		switch(cb.expr) {
+			case EFunction(_, f):
+				var functionArg = f.args[0];
+				switch(functionArg.type) {
+					case TPath(typepath):
+						// if (typepath.pack.length == 0) {
+						// 	Context.warning(typepath.name + " argument to callback should be fully typed (include the full package name)", self.pos);
+						// }
+						return {
+						    expr: ECall({
+						        expr: EField(self, "registerMessageHandlerByClass"),
+						        pos: self.pos
+						    // }, [ {expr :EConst(Constant.CString(typepath.pack.concat([typepath.name]).join("."))), pos:self.pos}, cb ]),
+						    }, [ {expr :EConst(Constant.CIdent(typepath.name)), pos:self.pos}, cb ]),
+						    pos: self.pos
+						};
+					default:
+						Context.error("Should not get here", self.pos);
+						return {expr :EConst(Constant.CString("test")), pos:self.pos};
+						//ignored
+				}
+			default: 
+				Context.error("You must pass in a function callback", self.pos);
+				return {expr :EConst(Constant.CString("test")), pos:self.pos};
+		}
+	}
+	
+	public function sendJson (obj :Dynamic) :Void
+	{
+		#if !macro
+			#if nodejs
+				sendMessage(Constants.PREFIX_HAXE_JSON + Node.stringify(obj));
+			#elseif html5
+				sendMessage(Constants.PREFIX_HAXE_JSON + JSON.stringify(obj));
+			#end
+		#end
+	}
+	
+	public function sendObj (obj :Dynamic) :Void
+	{
+		sendMessage(Constants.PREFIX_HAXE_OBJECT + Serializer.run(obj));
+	}
+	
+	public function sendMessage (serializedMessage :String) :Void
+	{
+		#if !macro
+			Assert.that(_connection != null, "_connection != null");
+			#if nodejs
+			_connection.sendUTF(serializedMessage);
+			#elseif html5
+			_connection.send(serializedMessage);
+			#end
+		#end
 	}
 	
 	function connect() :Void
 	{
-		#if nodejs
+		#if (nodejs && !macro)
 		Log.info("Attempting to connect to " + _ws_address);
 		_client.addListener('connectFailed', onConnectFailed);
 		_client.addListener('connect', onConnect);
-		_client.connect(_ws_address, [Constants.HAXE_PROTOCOL]);
+		_client.connect(_ws_address, [Constants.WEBSOCKET_PROTOCOL]);
 		#end
 	}
 	
 	function onError (err :Dynamic) :Void
 	{
+		#if !macro
 		Log.warn("Websocket closed");
+		#end
 	}
 	
 	function onClose () :Void
 	{
-		Log.warn("Websocket closed");
-		//Detach listeners?
-		_connection.removeListener('error', onError);
-		_connection.removeListener('message', onMessage);
-		_connection = null;
-		disconnected.emit(this);
+		#if !macro
+			Log.warn("Websocket closed");
+			#if nodejs
+			//Detach listeners?
+			_connection.removeListener('error', onError);
+			_connection.removeListener('message', onMessage);
+			#elseif html5
+			_connection.onerror = null;
+			_connection.onmessage = null;
+			#end
+			_connection = null;
+			disconnected.emit(this);
+		#end
 	}
 	
 	#if nodejs
 	function onConnect (connection :WebSocketConnection) :Void
+	{	
+		#if !macro
+			Log.info("Websocket connected to " + _ws_address);
+			_connection = connection;
+			_connection.addListener('error', onError);
+			_connection.addListener('message', onMessage);
+			_connection.once('close', onClose);
+			if (clientId != null) {
+				registerClient(clientId);
+			}
+			connected.emit(this);
+		#end
+	}
+	#elseif html5
+	function onConnect () :Void
 	{
+		#if !macro
 		Log.info("Websocket connected to " + _ws_address);
-		_connection = connection;
-		_connection.addListener('error', onError);
-		_connection.addListener('message', onMessage);
-		_connection.once('close', onClose);
-		Log.info("Sending client registration (clientId=" + clientId + ")");
-		_connection.sendUTF(Constants.REGISTER_CLIENT + clientId);
-		// sendMessage(new MessageRegisterClient(clientId));
+		
+		_connection.onerror = onError;
+		_connection.onclose = onClose;
+		_connection.onmessage = onMessage;
+		if (clientId != null) {
+			registerClient(clientId);
+		}
 		connected.emit(this);
+		
+		#end
 	}
 	#else
+	function onConnect () :Void {}
 	#end
 	
 	function onConnectFailed (error :Dynamic) :Void
 	{
+		#if !macro
 		Log.error("Websocket connection to " + _ws_address + " failed: " + error);
+		#end
 	}
+	
+	#if macro
+	function onMessage (message :Dynamic) :Void
+	{}
+	#elseif nodejs
+	function onMessage (message :WebSocketMessage) :Void
+	{
+		#if !macro
+			if (message.type == 'utf8') {
+				if (message.utf8Data.startsWith(Constants.PREFIX_HAXE_JSON)) {
+					var unserializedMessage :JsonMessage = Messages.decodeJsonMessage(message.utf8Data);
+					if (unserializedMessage != null && unserializedMessage.id != null && _messageSignals.exists(unserializedMessage.id)) {
+						_messageSignals.get(unserializedMessage.id).emit(unserializedMessage);
+					} else {
+						Log.warn("Json message not handled (missing id field?): " + message.utf8Data);
+						Log.warn("Message types handled: " + _messageSignals.keys());
+					}
+				} else if (message.utf8Data.startsWith(Constants.PREFIX_HAXE_OBJECT)) {
+					var unserializedMessage :Dynamic = Messages.decodeHaxeMessage(message.utf8Data);
+					if (unserializedMessage != null) {
+						var messageId :String = Type.getClassName(Type.getClass(unserializedMessage));
+						if (_messageSignals.exists(messageId)) {
+							_messageSignals.get(messageId).emit(unserializedMessage);
+						} else {
+							Log.warn("Message not handled: " + messageId);
+							Log.warn("Message types handled: " + _messageSignals.keys());
+						}
+					}
+				} else {
+					//Untyped message
+					Log.warn("Unhandled message: " + message.utf8Data);
+				}
+			}
+			else if (message.type == 'binary') {
+				Log.info('Received Binary Message of ' + message.binaryData.length + ' bytes');
+			}
+		#end
+	}
+	#elseif html5
+	function onMessage (msg :{data:String}) :Dynamic
+	{
+		#if !macro
+		Log.info("onMessage.data: " + msg.data);
+		#end
+		
+		var msgData = msg.data;
+		if (msgData.startsWith(Constants.PREFIX_HAXE_JSON)) {
+			var unserializedMessage :JsonMessage = Messages.decodeJsonMessage(msgData);
+			if (unserializedMessage != null && unserializedMessage.id != null && _messageSignals.exists(unserializedMessage.id)) {
+				_messageSignals.get(unserializedMessage.id).emit(unserializedMessage);
+			} else {
+				Log.warn("Json message not handled (missing id field?): " + msgData);
+				Log.warn("Message types handled: " + _messageSignals.keys());
+			}
+		} else if (msgData.startsWith(Constants.PREFIX_HAXE_OBJECT)) {
+			var unserializedMessage :Dynamic = Messages.decodeHaxeMessage(msgData);
+			if (unserializedMessage != null) {
+				var messageId :String = Type.getClassName(Type.getClass(unserializedMessage));
+				if (_messageSignals.exists(messageId)) {
+					_messageSignals.get(messageId).emit(unserializedMessage);
+				} else {
+					Log.warn("Message not handled: " + messageId);
+					Log.warn("Message types handled: " + _messageSignals.keys());
+				}
+			}
+		} else {
+			//Untyped message, unhandled
+			#if !macro
+			Log.warn("Message not handled: " + msgData);
+			Log.warn("Message types handled: " + _messageSignals.keys());
+			#end
+		}
+		
+		return msgData;
+		
+	}
+	#end
 
 }

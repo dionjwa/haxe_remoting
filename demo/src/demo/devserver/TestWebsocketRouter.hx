@@ -1,6 +1,7 @@
 package demo.devserver;
 
 import js.Node;
+import js.node.Connect;
 
 import transition9.websockets.WebsocketRouter;
 
@@ -15,7 +16,7 @@ class TestWebsocketRouter
 		var program :Dynamic= Node.require('commander');
 		program
 			.version('0.0.1')
-			.option('-w, --websocketport <websocketport>', 'specify the port [8000]', untyped Number, 8000)
+			.option('-w, --websocketport <websocketport>', 'specify the port [8001]', untyped Number, 8001)
 			.parse(Node.process.argv);
 			
 		var http :NodeHttp = Node.require('http');
@@ -25,33 +26,30 @@ class TestWebsocketRouter
 			res.end();
 		});
 		
+		
+		//http://www.senchalabs.org/connect/
+		// var connect :Connect = Node.require('connect');
+		// var server = connect.createServer(
+		// 	connect.logger('dev')
+		// );
+		
+		
+		
+		// server.listen(program.websocketport, 'localhost');
 		server.listen(program.websocketport, 'localhost', function() {
 			Log.info(Date.now() + ' Websocket server running at http://localhost:' + program.websocketport);
 		});
 		
 		var router = new WebsocketRouter(server);
 		
-		// router.registerHandler(Message, function(msg :Message) {
-		// 	Log.warn("Got message: " + msg);
-			
-		// 	var newMsg = new TestMessageType1();
-		// 	newMsg.fieldX = Std.int(Math.random() * 1000);
-		// 	router.sendMessage(newMsg);
-		// });
-		
-		router.registerHandler(TestMessageType1, function(msg :TestMessageType1) {
+		router.registerMessageHandler(function(msg :demo.devserver.TestMessageType1, conn :RouterSocketConnection) {
 			Log.warn("Got TestMessageType1: " + msg);
-			
-			// var newMsg = new TestMessageType1(msg.originId);
-			// newMsg.fieldX = Std.int(Math.random() * 1000);
 			var clientIds = router.getClientIds();
 			trace('clientIds=' + clientIds);
 			clientIds.remove(msg.originId);
 			trace("Sending to " + clientIds);
-			router.sendMessage(msg, clientIds);
+			router.sendObj(msg, clientIds);
 		});
-		
-		
 		
 	}
 }

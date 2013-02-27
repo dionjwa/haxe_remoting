@@ -45,6 +45,7 @@ class RemotingServer
 				//Allow calling remoting services with url args and getting json back, useful for testing/debugging
 				.allowJsonFallback()//
 				.buildConnectMiddleware()//This can be checked quickly
+			
 		).listen(program.port, 'localhost');
 		trace("Server listening on localhost:" + program.port);
 	}

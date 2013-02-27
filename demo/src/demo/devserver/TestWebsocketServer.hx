@@ -3,7 +3,7 @@ package demo.devserver;
 import js.Node;
 import js.node.WebSocketNode;
 
-using org.transition9.util.ArrayUtil;
+using flambe.util.Arrays;
 
 class TestWebsocketServer
 {

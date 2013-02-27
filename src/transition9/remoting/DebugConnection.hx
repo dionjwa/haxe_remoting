@@ -7,7 +7,8 @@ import haxe.remoting.Context;
   * For dummying up remoting connections locally.
   */
 class DebugConnection 
-	implements Connection, implements Dynamic<Connection>
+	implements Connection
+	implements Dynamic<Connection>
 {
 	/** Client side */
 	var _context : Context;

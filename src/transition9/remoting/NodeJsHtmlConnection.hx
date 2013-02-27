@@ -79,7 +79,7 @@ class NodeJsHtmlConnection
 				#if debug
 					//In debug mode, list all available services
 					var serviceIds = [];
-					var objects :Hash<Dynamic> = cast Reflect.field(_context, "objects");
+					var objects :Map<String, Dynamic> = cast Reflect.field(_context, "objects");
 					for (key in objects.keys()) {
 						serviceIds.push(key);
 					}

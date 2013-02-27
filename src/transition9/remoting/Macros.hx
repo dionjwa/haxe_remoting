@@ -8,7 +8,7 @@
  ******************************************************************************/
 package transition9.remoting;
 
-typedef StdType = Type;
+import Type in StdType;
 
 #if macro
 import haxe.macro.Expr;
@@ -29,17 +29,17 @@ class Macros
 	/**
 	 * Usage:
 	 * 
-     * @:build(transition9.remoting.Macros.remotingClass())
-     * class YourServerRemotingClass {
-     *
-     * This will add the following static var fields to the class:
-     * REMOTING_INTERFACE: A reference to the dynamically build interface matching the remote
-     * 										 methods (functions with the @remote metadata) of this class
-     * 
-     * REMOTING_ID: Used internally by the remoting system.
-     * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
-     */
-	@:macro
+	 * @:build(transition9.remoting.Macros.remotingClass())
+	 * class YourServerRemotingClass {
+	 *
+	 * This will add the following static var fields to the class:
+	 * REMOTING_INTERFACE: A reference to the dynamically build interface matching the remote
+	 * 										 methods (functions with the @remote metadata) of this class
+	 * 
+	 * REMOTING_ID: Used internally by the remoting system.
+	 * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
+	 */
+	macro 
 	public static function remotingClass(?convertNodeRelayArgs :Bool = false) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -82,21 +82,7 @@ class Macros
 		return haxe.macro.Context.getBuildFields().concat(fields);
 	}
 	
-	/**
-     */
-	// @:macro
-	// public static function getRemotingInterface(classNameExpr: Expr) :Expr
-	// {
-	// 	var pos =  Context.currentPos();
-	// 	var className = getClassNameFromClassExpr(classNameExpr);
-	// 	var interfaceName = getRemotingInterfaceNameFromClassName(className);
-	// 	// return macro StdType.resolveClass(interfaceName);
-	// 	var type = StdType.resolveClass(interfaceName);
-	// 	// return macro $type;
-	// 	// return {expr: macro type, pos:pos};
-	// }
-	
-	@:macro
+	macro
 	public static function getRemoteProxyClass(classNameExpr: Expr, ?excludeManager :Bool = true) :Expr
 	{
 		var pos =  Context.currentPos();
@@ -121,7 +107,7 @@ class Macros
 	  * Adds all methods from implemented interfaces for a class extending 
 	  * net.amago.components.remoting.AsyncProxy
 	  */
-	@:macro
+	macro
 	public static function addRemoteMethodsToInterfaceFrom(classExpr: Expr, ?convertNodeRelayArgsExpr :Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -150,7 +136,7 @@ class Macros
 	  * Takes a server remoting class and the connection variable, 
 	  * and returns an instance of the newly created proxy class.
 	  */
-	@:macro
+	macro
 	public static function buildAndInstantiateRemoteProxyClass(classExpr: Expr, connectionExpr: Expr, ?implementExpr :Expr) :Expr
 	{
 		var pos = Context.currentPos();
@@ -172,7 +158,7 @@ class Macros
 				name: ""
 			}
 			switch(proxyType) {
-				case TInst(typeRef, params):
+				case TInst(typeRef, _):
 					typePath.name = typeRef.get().name;
 					typePath.pack = typeRef.get().pack;
 				default: Context.warning("Type not handled: " + StdType.enumConstructor(proxyType), pos);
@@ -191,7 +177,7 @@ class Macros
 	/**
 	  * Takes a server remoting class adds the remoting methods to the proxy class.
 	  */
-	@:macro
+	macro
 	public static function addProxyRemoteMethodsFromClass(classExpr: Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -204,7 +190,7 @@ class Macros
 		return fields;
 	}
 	
-	@:macro
+	macro
 	public static function getRemotingId (classExpr :Expr) :Expr
 	{
 		var className = getClassNameFromClassExpr(classExpr);
@@ -213,65 +199,6 @@ class Macros
 		
 		// var remotingId = RemotingUtil.getRemotingIdFromManagerClassName(getClassNameFromClassExpr(classExpr));
 		// return { expr : EConst(CString(remotingId)), pos : Context.currentPos() };
-	}
-	
-	/**
-	 * Websocket build macro
-	  * Adds custom serialization functions 
-	  * http://haxe.org/manual/serialization
-	  * for all fields with the annotation @serialize
-	  */
-	@:macro
-	public static function buildWebsocketMessage() :Array<Field>
-	{
-		if (Context.defined("display")) {
-			// When running in code completion, skip out early
-			return haxe.macro.Context.getBuildFields();
-		}
-		
-		var pos = Context.currentPos();
-		
-		var cls = Context.getLocalClass().get();
-		
-		var serializableFieldNames = [];
-		
-		var classfields :Array<ClassField> = transition9.util.MacroUtil.getAllClassFields(cls.superClass.t.get());
-		
-		if (classfields != null) {
-			for (classField in classfields) {
-				if (classField.meta.has("serialize")) {
-					serializableFieldNames.push(classField.name);
-				}
-			}
-		}
-		
-		var buildFields = haxe.macro.Context.getBuildFields();
-		
-		for (f in buildFields) {
-			if (f.meta != null) {
-				for (m in f.meta) {
-					if (m.name == "serialize") {
-						serializableFieldNames.push(f.name);
-						break;
-					}
-				}
-			}
-		}
-		
-		var serializeExpressions = [];
-		var unserializeExpressions = [];
-		for (field in serializableFieldNames) {
-			serializeExpressions.push(Context.parse("s.serialize(" + field + ")", pos));
-			unserializeExpressions.push(Context.parse(field + " = s.unserialize()", pos));
-		}
-		
-		var serializeBlock = {expr:ExprDef.EBlock(serializeExpressions), pos :pos};
-		var unserializeBlock = {expr:ExprDef.EBlock(unserializeExpressions), pos :pos};
-		
-		return haxe.macro.Context.getBuildFields().concat(flambe.util.Macros.buildFields(macro {
-			function public__hxSerialize(s: haxe.Serializer) {$serializeBlock;}
-			function public__hxUnserialize(s: haxe.Unserializer) {$unserializeBlock;}
-		}));
 	}
 	
 	/**
@@ -315,7 +242,7 @@ class Macros
 		
 		// Context.warning("path: " + path, pos);
 		
-		if (!neko.FileSystem.exists(path)) {
+		if (!sys.FileSystem.exists(path)) {
 			Context.error("Remoting class '" + remoteClassName + "' does not resolve to a valid path=" + path, pos);
 		// } else {
 		// 	Context.warning("path: exists" + path, pos);
@@ -324,7 +251,7 @@ class Macros
 		
 		var fileContent = "";
 		// open and read file line by line
-		var fin = neko.io.File.read(path, false);
+		var fin = sys.io.File.read(path, false);
 		try {
 			var lineNum = 0;
 			while(!fin.eof()) {
@@ -441,7 +368,7 @@ class Macros
 		if (implementExpr != null) {
 			implement = [];
 			switch(Context.typeof(implementExpr)) {
-				case TType(t, params):
+				case TType(t, _):
 					var path :TypePath = {
 						sub : null,
 						params : [],
@@ -496,7 +423,7 @@ class Macros
 		var pathTokens = className.split(".");
 		
 		if (pathTokens.length == 1) {
-			return {expr: EConst(CType(className)), pos: pos};
+			return {expr: EConst(CString(className)), pos: pos};
 		}
 		
 		var pathExpr = null;
@@ -510,7 +437,7 @@ class Macros
 		}
 		
 		return {
-			expr: EType(pathExpr, pathTokens.shift()),
+			expr: EField(pathExpr, pathTokens.shift()),
 			pos: pos
 		}
 	}
@@ -593,13 +520,13 @@ class Macros
 					return "";
 			}
 		}
-		
+		// Context.warning("classNameExpr.expr: " + classNameExpr.expr, Context.currentPos());
 		switch(classNameExpr.expr) {
-			case EType(e1, field):
+			case EField(e1, field):
 				className = field;
 				// Context.warning(className, Context.currentPos());
 				switch(e1.expr) {
-					case EField(e2, field):
+					case EField(_, _):
 						className = drillIntoEField(e1) + "." + className;
 					case EConst(c):
 						switch(c) {
@@ -619,13 +546,13 @@ class Macros
 					case CString(s):
 						// Context.warning(s, Context.currentPos());
 						className = s;
-					case CType(s):
-						// Context.warning(s, Context.currentPos());
-						className = s;
+					// case CType(s):
+					// 	// Context.warning(s, Context.currentPos());
+					// 	className = s;
 					default:Context.warning(StdType.enumConstructor(c) + " not handled", Context.currentPos());
 				}
-			case EField(e, field):
-				className = drillIntoEField(e) + "." + field;
+			// case EField(e, field):
+			// 	className = drillIntoEField(e) + "." + field;
 			default: Context.warning(StdType.enumConstructor(classNameExpr.expr) + " not handled", Context.currentPos());
 		}
 		
@@ -636,16 +563,17 @@ class Macros
 	
 	public static function isInterfaceExpr (typeExpr :Expr) :Bool
 	{
-		switch(typeExpr.expr) {
-			case EType(e1, field):
-				switch(Context.typeof(typeExpr)) {
-					case TType(t, params):
-						return true;
-					default: 
-						return false;
-				}
-			default: return false;
-		}
+		// switch(typeExpr.expr) {
+		// 	case EField(e1, field):
+		// 		switch(Context.typeof(typeExpr)) {
+		// 			case TType(t, params):
+		// 				return true;
+		// 			default: 
+		// 				return false;
+		// 		}
+		// 	default: return false;
+		// }
+		return false;
 	}
 	
 	public static function getProxyRemoteClassName(className : String) :String

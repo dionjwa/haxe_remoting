@@ -10,6 +10,7 @@ This package consists of:
 1. Node.js remoting connections, one using NodeRelay<T> (thanks Bruno Garcia), the other not.
 2. Macros to build async client proxy remoting classes from interfaces or the server remoting class.  All server classes are excluded from the client.
 3. Flash <-> JS asynchronous remoting connection (ExternalAsyncConnection)
+4. Websocket wrappers for passing both JSON and Haxe serialized objects between a websocket client and server (Node.js)
 
 See the demo for a working example.
 
@@ -29,11 +30,11 @@ To run the remoting demo:
 
 - In one terminal window run the server:
 	
-	node deploy/remoting-server-server/remoting-server.js
+	node deploy/remoting-server/server.js
 
 - In another terminal window, run the client:
 	
-	node deploy/remoting-client-server/remoting-client.js
+	node deploy/remoting-server/client.js
 	
 In the client window, type a number and then enter.  The server sends back a processed result.
 
@@ -98,3 +99,17 @@ There are two unit tests:
 ## Coming soon:
 
 Websockets.
+
+To run the websocket demo:
+
+- In one terminal window run the server:
+	
+	node deploy/websocket-server/server.js
+
+- In another terminal window, run the first client:
+	
+	node deploy/websocket-server/client.js
+	
+- Finally in a third terminal window, run the second client:
+	
+	node deploy/websocket-server/client.js
