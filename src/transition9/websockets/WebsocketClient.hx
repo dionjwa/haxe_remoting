@@ -17,7 +17,7 @@ import transition9.websockets.Messages;
 
 using StringTools;
 
-#if nodejs
+#if (nodejs || nodejs_std)
 	#if !macro
 		import js.Node;
 		import js.node.WebSocketNode;
@@ -39,24 +39,32 @@ class WebsocketClient
 	
 	var _messageSignal :Signal1<Dynamic>;
 	var _ws_address :String;
-	#if (nodejs && !macro)
+	#if ((nodejs || nodejs_std) && !macro)
 	var _connection :WebSocketConnection;
 	var _client :js.node.WebSocketNode.WebSocketClient;
 	#elseif html5
 	var _connection :WebSocket;
 	#end
 	
+	#if haxe3
 	var _messageSignals :Map<String, Signal1<Dynamic>>;
+	#else
+	var _messageSignals :Hash<Signal1<Dynamic>>;
+	#end
 	
 	public function new (ws_address :String, ?clientId :String)
 	{
+		#if haxe3
 		_messageSignals = new Map<String, Signal1<Dynamic>>();
+		#else
+		_messageSignals = new Hash<Signal1<Dynamic>>();
+		#end
 		this.connected = new Signal1();
 		this.disconnected = new Signal1();
 		this.clientId = clientId;
 		_ws_address = ws_address;
 		#if !macro
-			#if nodejs
+			#if (nodejs || nodejs_std)
 			var WebSocketClient = Node.require('websocket').client;
 			var clientConfig :WebSocketClientConfig = {};
 			_client = untyped __js__("new WebSocketClient([clientConfig])");
@@ -77,7 +85,7 @@ class WebsocketClient
 			if (clientId != null) {
 				this.clientId = clientId;
 				Log.info("Sending client registration (clientId=" + clientId + ")");
-				#if nodejs
+				#if (nodejs || nodejs_std)
 				_connection.sendUTF(Constants.PREFIX_REGISTER_CLIENT + clientId);
 				#elseif html5
 				_connection.send(Constants.PREFIX_REGISTER_CLIENT + clientId);
@@ -109,7 +117,12 @@ class WebsocketClient
 	
 	//Rewrites into registerMessageHandlerById(Type.getClassName(T), cb);
 	// macro public function registerMessageHandler <T> (self :Expr, cb :ExprRequire<T->Void>)
-	macro public function registerMessageHandler <T> (self :Expr, cb :Expr)
+	#if haxe3
+	macro
+	#else
+	@:macro
+	#end
+	public function registerMessageHandler <T> (self :Expr, cb :Expr)
 	{
 		switch(cb.expr) {
 			case EFunction(_, f):
@@ -141,7 +154,7 @@ class WebsocketClient
 	public function sendJson (obj :Dynamic) :Void
 	{
 		#if !macro
-			#if nodejs
+			#if (nodejs || nodejs_std)
 				sendMessage(Constants.PREFIX_HAXE_JSON + Node.stringify(obj));
 			#elseif html5
 				sendMessage(Constants.PREFIX_HAXE_JSON + JSON.stringify(obj));
@@ -158,7 +171,7 @@ class WebsocketClient
 	{
 		#if !macro
 			Assert.that(_connection != null, "_connection != null");
-			#if nodejs
+			#if (nodejs || nodejs_std)
 			_connection.sendUTF(serializedMessage);
 			#elseif html5
 			_connection.send(serializedMessage);
@@ -168,7 +181,7 @@ class WebsocketClient
 	
 	function connect() :Void
 	{
-		#if (nodejs && !macro)
+		#if ((nodejs || nodejs_std) && !macro)
 		Log.info("Attempting to connect to " + _ws_address);
 		_client.addListener('connectFailed', onConnectFailed);
 		_client.addListener('connect', onConnect);
@@ -187,7 +200,7 @@ class WebsocketClient
 	{
 		#if !macro
 			Log.warn("Websocket closed");
-			#if nodejs
+			#if (nodejs || nodejs_std)
 			//Detach listeners?
 			_connection.removeListener('error', onError);
 			_connection.removeListener('message', onMessage);
@@ -200,7 +213,7 @@ class WebsocketClient
 		#end
 	}
 	
-	#if nodejs
+	#if (nodejs || nodejs_std)
 	function onConnect (connection :WebSocketConnection) :Void
 	{	
 		#if !macro
@@ -245,7 +258,7 @@ class WebsocketClient
 	#if macro
 	function onMessage (message :Dynamic) :Void
 	{}
-	#elseif nodejs
+	#elseif (nodejs || nodejs_std)
 	function onMessage (message :WebSocketMessage) :Void
 	{
 		#if !macro

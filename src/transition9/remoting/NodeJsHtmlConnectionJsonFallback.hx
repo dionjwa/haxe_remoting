@@ -8,7 +8,7 @@
  ******************************************************************************/
 package transition9.remoting;
 
-#if !nodejs
+#if !(nodejs || nodejs_std)
 #error
 #end
 
@@ -78,7 +78,11 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 						}
 					}
 				} catch (e :Dynamic) {
-					Log.error(e);
+					#if flambe
+						Log.error(e);
+					#else
+						trace(e);
+					#end
 				}
 				
 				res.writeHead(200);

@@ -20,7 +20,11 @@ class ExternalAsyncConnection implements AsyncConnection
 	var _errorHandler :Dynamic->Void;
 	
 	static var _callbackHash :Int = 1;
+	#if haxe3
 	static var _callbacks = new Map<Int, Null<Dynamic>->Void>();
+	#else
+	static var _callbacks = new IntHash<Null<Dynamic>->Void>();
+	#end
 	
 	function new( data, path ) {
 		__data = data;
@@ -115,7 +119,11 @@ class ExternalAsyncConnection implements AsyncConnection
 		#end
 	}
 
+	#if haxe3
 	static var connections = new Map<String, ExternalAsyncConnection>();
+	#else
+	static var connections = new Hash<ExternalAsyncConnection>();
+	#end
 
 	static function doCall( name : String, path : String, params : String, callbackId :Int ) : Void {
 		try {

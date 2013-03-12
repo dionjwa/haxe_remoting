@@ -8,7 +8,11 @@
  ******************************************************************************/
 package transition9.websockets;
 
+#if haxe3
 import Type in StdType;
+#else
+typedef StdType = Type;
+#end
 
 #if macro
 import haxe.macro.Expr;
@@ -32,7 +36,11 @@ class Macros
 	  * http://haxe.org/manual/serialization
 	  * for all fields with the annotation @serialize
 	  */
+	#if haxe3
 	macro
+	#else
+	@:macro
+	#end
 	public static function buildWebsocketMessage() :Array<Field>
 	{
 		if (Context.defined("display")) {

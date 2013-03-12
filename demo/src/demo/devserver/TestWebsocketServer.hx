@@ -3,7 +3,7 @@ package demo.devserver;
 import js.Node;
 import js.node.WebSocketNode;
 
-using flambe.util.Arrays;
+using Lambda;
 
 class TestWebsocketServer
 {
@@ -37,7 +37,7 @@ class TestWebsocketServer
 		
 		var requestAllowed = function (request :WebSocketRequest) :Bool {
 		  // put logic here to detect whether the specified origin is allowed.
-		  return request.requestedProtocols.exists('echo-protocol');
+		  return request.requestedProtocols.indexOf('echo-protocol') > -1;
 		}
 		
 		wsServer.on('request', function(request :WebSocketRequest) {

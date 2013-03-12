@@ -3,7 +3,7 @@ package transition9.websockets;
 import haxe.Unserializer;
 
 #if !macro
-	#if nodejs
+	#if (nodejs || nodejs_std)
 	import js.Node;
 	#end
 #end
@@ -36,7 +36,7 @@ class Messages
 	{
 		#if !macro
 			try {
-				#if nodejs
+				#if (nodejs || nodejs_std)
 				return Node.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));
 				#elseif html5
 				return JSON.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));

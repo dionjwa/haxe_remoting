@@ -8,7 +8,7 @@
  ******************************************************************************/
 package transition9.remoting;
 
-#if !nodejs
+#if !(nodejs || nodejs_std)
 #error
 #end
 
@@ -79,7 +79,11 @@ class NodeJsHtmlConnection
 				#if debug
 					//In debug mode, list all available services
 					var serviceIds = [];
+					#if haxe3
 					var objects :Map<String, Dynamic> = cast Reflect.field(_context, "objects");
+					#else
+					var objects :Hash<Dynamic> = cast Reflect.field(_context, "objects");
+					#end
 					for (key in objects.keys()) {
 						serviceIds.push(key);
 					}

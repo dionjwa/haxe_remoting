@@ -98,7 +98,7 @@ There are two unit tests:
 	
 ## Coming soon:
 
-Websockets.
+Websockets.  Relies on the flambe lib.
 
 To run the websocket demo:
 

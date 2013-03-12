@@ -11,7 +11,7 @@ import haxe.Unserializer;
 import transition9.websockets.Messages;
 
 #if !macro
-	#if nodejs
+	#if (nodejs || nodejs_std)
 	import js.node.WebSocketNode;
 	import js.Node;
 	#end
@@ -37,8 +37,14 @@ class WebsocketRouter
 	public var clientRegistered (default, null):Signal1<RouterSocketConnection>;
 	
 	
+	#if haxe3
 	var _messageSignals :Map<String, Signal2<Dynamic, RouterSocketConnection>>;
 	var _mappedConnections :Map<String, RouterSocketConnection>;
+	#else
+	var _messageSignals :Hash<Signal2<Dynamic, RouterSocketConnection>>;
+	var _mappedConnections :Hash<RouterSocketConnection>;
+	#end
+	
 	var _unMappedConnections :Array<RouterSocketConnection>;
 	#if !macro
 	var _websocketServer :WebSocketServer;
@@ -51,7 +57,14 @@ class WebsocketRouter
 		this.clientDisconnected = new Signal1<RouterSocketConnection>();
 		this.clientRegistered = new Signal1<RouterSocketConnection>();
 		
+		#if haxe3
+		_messageSignals = new Map<String, Signal2<Dynamic, RouterSocketConnection>>();
 		_mappedConnections = new Map();
+		#else
+		_messageSignals = new Hash<Signal2<Dynamic, RouterSocketConnection>>();
+		_mappedConnections = new Hash();
+		#end
+		
 		_unMappedConnections = [];
 		var WebSocketServer = Node.require('websocket').server;
 		var serverConfig :WebSocketServerConfig = {httpServer:httpServer, autoAcceptConnections:false};
@@ -60,7 +73,7 @@ class WebsocketRouter
 		_websocketServer.on('request', onWebsocketRequest);
 		_websocketServer.mount(serverConfig);
 		
-		_messageSignals = new Map<String, Signal2<Dynamic, RouterSocketConnection>>();
+		
 	}
 	#else
 	public function new (ignored :Dynamic) {}
@@ -133,9 +146,14 @@ class WebsocketRouter
 	}
 	
 	//Rewrites into registerMessageHandlerById(Type.getClassName(T), cb);
+	#if haxe3
 	macro
-	// public function registerMessageHandler <T> (self :Expr, cb :ExprRequire<T->RouterSocketConnection->Void>)
 	public function registerMessageHandler <T> (self :Expr, cb :Expr)
+	#else
+	@:macro
+	public function registerMessageHandler <T> (self :Expr, cb :ExprRequire<T->RouterSocketConnection->Void>)
+	#end
+	// public function registerMessageHandler <T> (self :Expr, cb :Expr)
 	{
 		switch(cb.expr) {
 			case EFunction(_, f):

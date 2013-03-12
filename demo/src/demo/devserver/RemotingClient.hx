@@ -21,7 +21,12 @@ class RemotingClient
 		var url = "http://localhost:" + program.port;
 		var conn = haxe.remoting.HttpAsyncConnection.urlConnect(url);
 		conn.setErrorHandler(function(error) {
+			#if haxe3
 			Log.error(error + "\n" + haxe.CallStack.toString(haxe.CallStack.callStack()));
+			#else
+			Log.error(error + "\n" + haxe.Stack.toString(haxe.Stack.callStack()));
+			#end
+			
 		});
 		
 		//We need to declare the proxy class here.

@@ -8,7 +8,11 @@
  ******************************************************************************/
 package transition9.remoting;
 
+#if haxe3
 import Type in StdType;
+#else
+typedef StdType=Type;
+#end
 
 #if macro
 import haxe.macro.Expr;
@@ -39,7 +43,7 @@ class Macros
 	 * REMOTING_ID: Used internally by the remoting system.
 	 * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
 	 */
-	macro 
+	#if haxe3 macro #else @:macro #end 
 	public static function remotingClass(?convertNodeRelayArgs :Bool = false) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -82,7 +86,7 @@ class Macros
 		return haxe.macro.Context.getBuildFields().concat(fields);
 	}
 	
-	macro
+	#if haxe3 macro #else @:macro #end
 	public static function getRemoteProxyClass(classNameExpr: Expr, ?excludeManager :Bool = true) :Expr
 	{
 		var pos =  Context.currentPos();
@@ -107,7 +111,7 @@ class Macros
 	  * Adds all methods from implemented interfaces for a class extending 
 	  * net.amago.components.remoting.AsyncProxy
 	  */
-	macro
+	#if haxe3 macro #else @:macro #end
 	public static function addRemoteMethodsToInterfaceFrom(classExpr: Expr, ?convertNodeRelayArgsExpr :Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -136,7 +140,7 @@ class Macros
 	  * Takes a server remoting class and the connection variable, 
 	  * and returns an instance of the newly created proxy class.
 	  */
-	macro
+	#if haxe3 macro #else @:macro #end
 	public static function buildAndInstantiateRemoteProxyClass(classExpr: Expr, connectionExpr: Expr, ?implementExpr :Expr) :Expr
 	{
 		var pos = Context.currentPos();
@@ -177,7 +181,7 @@ class Macros
 	/**
 	  * Takes a server remoting class adds the remoting methods to the proxy class.
 	  */
-	macro
+	#if haxe3 macro #else @:macro #end
 	public static function addProxyRemoteMethodsFromClass(classExpr: Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -190,7 +194,7 @@ class Macros
 		return fields;
 	}
 	
-	macro
+	#if haxe3 macro #else @:macro #end
 	public static function getRemotingId (classExpr :Expr) :Expr
 	{
 		var className = getClassNameFromClassExpr(classExpr);

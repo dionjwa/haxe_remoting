@@ -23,7 +23,7 @@ def build(ctx):
         npm_libs="commander websocket connect",
         main="demo.devserver.TestWebsocketRouter",
         classpath=classpaths,
-        libs="flambe nodejs nodejs_externs nodejs-std",
+        libs="flambe nodejs_std nodejs_externs",
         target="server.js")
     
     ctx(name="websocket", 
@@ -31,7 +31,7 @@ def build(ctx):
         npm_libs="commander websocket",
         main="demo.devserver.TestWebsocketRouterClient",
         classpath=classpaths,
-        libs="flambe nodejs nodejs_externs nodejs-std",
+        libs="flambe nodejs_std nodejs_externs",
         target="client.js")
     
     ctx(features="flambe-server",
@@ -39,7 +39,7 @@ def build(ctx):
         npm_libs="connect commander",
         main="demo.devserver.RemotingServer",
         classpath=classpaths,
-        libs="flambe nodejs nodejs_externs nodejs-std",
+        libs="flambe nodejs_std nodejs_externs",
         target="server.js")
     
     ctx(name="remoting", 
@@ -47,5 +47,5 @@ def build(ctx):
         npm_libs="connect commander",
         main="demo.devserver.RemotingClient",
         classpath=classpaths,
-        libs="flambe nodejs nodejs_externs nodejs-std",
+        libs="flambe nodejs_std nodejs_externs",
         target="client.js")

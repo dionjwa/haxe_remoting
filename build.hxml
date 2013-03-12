@@ -3,13 +3,13 @@
 --no-inline
 --js-modern
 
--D server
+# -D server
 
--lib nodejs
+-lib nodejs_std
 -lib flambe
 -lib nodejs_externs
 -lib html5
--lib nodejs-std
+-lib nodejs_std
 
 -cp src
 -cp demo/src
@@ -18,5 +18,6 @@
 
 #Compile all classes
 -main demo.devserver.CompileAll
+
 
 
