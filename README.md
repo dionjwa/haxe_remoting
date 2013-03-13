@@ -45,7 +45,7 @@ Assume you have a remoting class on the server:
 
 	package foo;
 
-	@:build(haxe.remoting.Macros.remotingClass())
+	@:build(transition9.remoting.Macros.remotingClass())
 	class FooRemote
 	{
 		@remote
@@ -62,7 +62,7 @@ On the client, you can construct a fully typed proxy async remoting class with:
 	
 	//Build and instantiate the proxy class with macros.  
 	//The full path to the server class is given as the first argument, but it is NOT compiled into the client by default
-	var fooProxy = haxe.remoting.Macros.buildAndInstantiateRemoteProxyClass(foo.FooRemote, conn);
+	var fooProxy = transition9.remoting.Macros.buildAndInstantiateRemoteProxyClass(foo.FooRemote, conn);
 	
 	//You can use code completion here
 	fooProxy.getTheFoo("fooId", function (foo :String) :Void {
@@ -79,13 +79,13 @@ Instead of a remoting class, you can also build the proxy from an interface:
 	
 You can also create an interface from the remoting class:
 
-	@:build(haxe.remoting.Macros.addRemoteMethodsToInterfaceFrom(foo.FooRemote))
+	@:build(transition9.remoting.Macros.addRemoteMethodsToInterfaceFrom(foo.FooRemote))
 	interface FooService {}
 	
 Then the client proxy class is declared with
 
-	@:build(haxe.remoting.Macros.buildAsyncProxyClassFromInterface(FooRemote))
-	//Or @:build(haxe.remoting.Macros.buildAsyncProxyClassFromInterface("foo.FooRemote"))
+	@:build(transition9.remoting.Macros.buildAsyncProxyClassFromInterface(FooRemote))
+	//Or @:build(transition9.remoting.Macros.buildAsyncProxyClassFromInterface("foo.FooRemote"))
 	class FooProxy implements IRemotingService {}:
 	
 In the future, you will be able to build and instantiate the interface derived proxy the same as the class derived proxy above.

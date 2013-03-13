@@ -64,8 +64,8 @@ class NodeJsHtmlConnection
 					flambe.util.Assert.that(data != null, "data != null");
 					res.end("hxr" + haxe.Serializer.run(data));
 				};
-				var nodeUrl :NodeUrlObj = Node.url.parse(req.url, true);
-				var requestData = nodeUrl.query.__x;
+				var requestData = req.method == 'POST' ? 
+					(content.urlDecode().substr(4)) : (Node.url.parse(req.url, true).query.__x);
 				flambe.util.Assert.that(requestData != null, "requestData != null");
 				var u = new haxe.Unserializer(requestData);
 				var path = u.unserialize();

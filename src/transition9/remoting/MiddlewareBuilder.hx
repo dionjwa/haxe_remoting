@@ -16,9 +16,6 @@ class MiddlewareBuilder
 	public function new ()
 	{
 		_context = new Context();
-		#if debug
-		#else
-		#end
 		_serviceHandler = new NodeJsHtmlConnection(_context);
 	}
 	
