@@ -46,19 +46,11 @@ class WebsocketClient
 	var _connection :WebSocket;
 	#end
 	
-	#if haxe3
 	var _messageSignals :Map<String, Signal1<Dynamic>>;
-	#else
-	var _messageSignals :Hash<Signal1<Dynamic>>;
-	#end
 	
 	public function new (ws_address :String, ?clientId :String)
 	{
-		#if haxe3
 		_messageSignals = new Map<String, Signal1<Dynamic>>();
-		#else
-		_messageSignals = new Hash<Signal1<Dynamic>>();
-		#end
 		this.connected = new Signal1();
 		this.disconnected = new Signal1();
 		this.clientId = clientId;
@@ -117,11 +109,7 @@ class WebsocketClient
 	
 	//Rewrites into registerMessageHandlerById(Type.getClassName(T), cb);
 	// macro public function registerMessageHandler <T> (self :Expr, cb :ExprRequire<T->Void>)
-	#if haxe3
 	macro
-	#else
-	@:macro
-	#end
 	public function registerMessageHandler <T> (self :Expr, cb :Expr)
 	{
 		switch(cb.expr) {

@@ -8,11 +8,7 @@
  ******************************************************************************/
 package transition9.remoting;
 
-#if haxe3
 import Type in StdType;
-#else
-typedef StdType=Type;
-#end
 
 #if macro
 import haxe.macro.Expr;
@@ -43,7 +39,7 @@ class Macros
 	 * REMOTING_ID: Used internally by the remoting system.
 	 * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
 	 */
-	#if haxe3 macro #else @:macro #end 
+	macro 
 	public static function remotingClass(?convertNodeRelayArgs :Bool = false) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -51,6 +47,7 @@ class Macros
 		var className = cls.name;
 		var fullClassName = cls.pack.join(".") + "." + cls.name;
 		var interfacePackageName = getRemotingInterfaceNameFromClassName(fullClassName);
+		// Context.warning("interfacePackageName: " + interfacePackageName, pos);
 		
 		var interfaceTypePath :TypePath = {
 			sub: null,
@@ -86,7 +83,7 @@ class Macros
 		return haxe.macro.Context.getBuildFields().concat(fields);
 	}
 	
-	#if haxe3 macro #else @:macro #end
+	macro
 	public static function getRemoteProxyClass(classNameExpr: Expr, ?excludeManager :Bool = true) :Expr
 	{
 		var pos =  Context.currentPos();
@@ -107,26 +104,130 @@ class Macros
 		return createClassConstant(proxyClassName, pos);
 	}
 	
+	// macro
+	// public static function getRemotingTypeDefType (classExpr: Expr, ?convertNodeRelayArgsExpr :Expr) :haxe.macro.Type
+	// {
+	// 	var pos = Context.currentPos();
+	// 	var convertNodeRelayArgs :Bool = getBoolFromExpr(convertNodeRelayArgsExpr);
+	// 	var className = getClassNameFromClassExpr(classExpr);
+		
+	// 	var fields = createAsyncProxyMethodsFromClassFile(className, true, convertNodeRelayArgs);
+		
+	// 	var typedefName = className + "TD";
+		
+	// 	Context.defineType({
+	// 		pos: pos, //the position the type is associated with - should probably point to your XML file
+	// 		params: [], //we have no type parameters in this example
+	// 		pack: [], //no package
+	// 		name: typedefName,
+	// 		fields: [], //we use a different mechanism to add fields, so we pass none here
+	// 		isExtern: false, //not extern
+	// 		meta: [], //no metadata
+	// 		kind: TDAlias( TAnonymous(fields))
+	// 		//here we "alias" (which is what a typedef does) to a fitting ComplexType
+	// 		// 	if (superType == null) 
+					
+	// 		// 	else 
+	// 		// 		TExtend(superType, fields)
+	// 		// )
+	// 	});
+	// 	// Context.warning("Context.getLocalType(): " + Context.getLocalType(), pos);
+	// 	// Context.warning("Context.getType(typedefName): " + Context.getType("ManifestServiceProxy"), pos);
+		
+	// 	// // return Context.getLocalType();
+	// 	// return Context.getType("ManifestServiceProxy");
+		
+		
+		
+	// 	// return haxe.macro.Type.TType(t , []);
+		
+		
+		
+		
+		
+		
+	// 	// return Context.getType(typedefName);
+			
+	// 	// return newFields;
+	// 	// function mkPath(name:String):TypePath {
+	// 	// 	var parts = name.split('.');
+	// 	// 	return {
+	// 	// 		sub: null,
+	// 	// 		params: [],
+	// 	// 		name: parts.pop(),
+	// 	// 		pack: parts
+	// 	// 	}
+	// 	// }
+	// 	// function mkType(s:String):ComplexType
+	// 	// 	return TPath(mkPath(s));
+			
+	// 	// function mkField(name:String, type:ComplexType):Field 
+	// 	// 	return {
+	// 	// 		pos: pos,
+	// 	// 		name: name,
+	// 	// 		meta: [],
+	// 	// 		kind: FFun(type),
+	// 	// 		doc: null,
+	// 	// 		access: []
+	// 	// 	}
+						
+	// 	// function declare(name:String, fields:Array<Field>) :haxe.macro.Type
+	// 	// 	Context.defineType({
+	// 	// 		pos: pos, //the position the type is associated with - should probably point to your XML file
+	// 	// 		params: [], //we have no type parameters in this example
+	// 	// 		pack: [], //no package
+	// 	// 		name: name + "TD",
+	// 	// 		fields: [], //we use a different mechanism to add fields, so we pass none here
+	// 	// 		isExtern: false, //not extern
+	// 	// 		meta: [], //no metadata
+	// 	// 		kind: TDAlias( TAnonymous(fields))
+	// 	// 		//here we "alias" (which is what a typedef does) to a fitting ComplexType
+	// 	// 		// 	if (superType == null) 
+						
+	// 	// 		// 	else 
+	// 	// 		// 		TExtend(superType, fields)
+	// 	// 		// )
+	// 	// 	});
+			
+			
+			
+	// 	// return Context.defineType({
+	// 	// 		pos: pos, //the position the type is associated with - should probably point to your XML file
+	// 	// 		params: [], //we have no type parameters in this example
+	// 	// 		pack: [], //no package
+	// 	// 		name: name,
+	// 	// 		fields: [], //we use a different mechanism to add fields, so we pass none here
+	// 	// 		isExtern: false, //not extern
+	// 	// 		meta: [], //no metadata
+	// 	// 		kind: TDAlias( //here we "alias" (which is what a typedef does) to a fitting ComplexType
+	// 	// 			if (superType == null) 
+	// 	// 				TAnonymous(fields)
+	// 	// 			else 
+	// 	// 				TExtend(superType, fields)
+	// 	// 		)
+	// 	// 	});					
+	// 	// return haxe.macro.Type.TType(t , params )
+		
+	// 	// Context.warning("newFields: " + newFields, pos);
+		
+	// 	// var newType = declare("foo", newFields);
+		
+	// 	// // Context.warning("newType: " + newType, pos);
+		
+	// 	// // return haxe.macro.Context.typeof(newType);
+	// 	// return null;
+	// }
+	
 	/**
 	  * Adds all methods from implemented interfaces for a class extending 
 	  * net.amago.components.remoting.AsyncProxy
 	  */
-	#if haxe3 macro #else @:macro #end
+	macro
 	public static function addRemoteMethodsToInterfaceFrom(classExpr: Expr, ?convertNodeRelayArgsExpr :Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
 		
-		var convertNodeRelayArgs :Bool = convertNodeRelayArgsExpr == null ? true : switch (convertNodeRelayArgsExpr.expr) {
-			case EConst(c):
-				switch (c) {
-					case CIdent(v):
-						v != "false";
-					default: true;
-				}
-					
-			default: true;
-		}
-		
+		var convertNodeRelayArgs :Bool = getBoolFromExpr(convertNodeRelayArgsExpr);
 		var className = getClassNameFromClassExpr(classExpr);
 		
 		var fields = haxe.macro.Context.getBuildFields();
@@ -140,7 +241,7 @@ class Macros
 	  * Takes a server remoting class and the connection variable, 
 	  * and returns an instance of the newly created proxy class.
 	  */
-	#if haxe3 macro #else @:macro #end
+	macro
 	public static function buildAndInstantiateRemoteProxyClass(classExpr: Expr, connectionExpr: Expr, ?implementExpr :Expr) :Expr
 	{
 		var pos = Context.currentPos();
@@ -181,7 +282,7 @@ class Macros
 	/**
 	  * Takes a server remoting class adds the remoting methods to the proxy class.
 	  */
-	#if haxe3 macro #else @:macro #end
+	macro
 	public static function addProxyRemoteMethodsFromClass(classExpr: Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
@@ -194,7 +295,7 @@ class Macros
 		return fields;
 	}
 	
-	#if haxe3 macro #else @:macro #end
+	macro
 	public static function getRemotingId (classExpr :Expr) :Expr
 	{
 		var className = getClassNameFromClassExpr(classExpr);
@@ -370,9 +471,17 @@ class Macros
 		
 		var implement :Array<TypePath> = null;
 		if (implementExpr != null) {
+			
+			// Context.warning("implementExpr: " + implementExpr, pos);
+			
+			// Context.warning("Context.typeof(implementExpr): " + Context.typeof(implementExpr), pos);
 			implement = [];
 			switch(Context.typeof(implementExpr)) {
 				case TType(t, _):
+					// Context.warning("x: " + x, pos);	
+					// Context.warning("t.get().pack: " + t.get().pack, pos);
+					// Context.warning("t.get().name: " + t.get().name, pos);
+					// t.get().
 					var path :TypePath = {
 						sub : null,
 						params : [],
@@ -383,6 +492,8 @@ class Macros
 				default: 
 			}
 		}
+		
+		// Context.warning("implement: " + implement, pos);
 		
 		var newProxyType :haxe.macro.TypeDefinition = {
 			pack: proxyClassName.split(".").length > 0 ? proxyClassName.split(".").slice(0, proxyClassName.split(".").length - 1) : [],
@@ -444,21 +555,6 @@ class Macros
 			expr: EField(pathExpr, pathTokens.shift()),
 			pos: pos
 		}
-	}
-	
-	/**
-	  * From foo.bar.SomeManager creates foo.bar.SomeManagerService 
-	  */
-	public static function getRemotingInterfaceNameFromClassName (managerClassName :String) :String
-	{
-		var remoteId = managerClassName;
-		var tokens = remoteId.split(".");
-		remoteId = tokens[tokens.length - 1];
-		remoteId = remoteId.substr(0, 1).toUpperCase() + remoteId.substr(1);
-		// remoteId += "Service";
-		remoteId = "I" + remoteId;
-		tokens[tokens.length - 1] = remoteId;
-		return tokens.join('.'); 
 	}
 	
 	/**
@@ -585,5 +681,42 @@ class Macros
 		return className + "Proxy";
 	}
 	
+	/**
+	  * Assumes false if expr is null
+	  */
+	static function getBoolFromExpr (expr :Expr) :Bool
+	{
+		if (expr == null) {
+			return false;
+		}
+		
+		switch (expr.expr) {
+			case EConst(c):
+				switch (c) {
+					case CIdent(v):
+						return v != "false";
+					default: 
+						return true;
+				}
+					
+			default: 
+				return true;
+		}
+	}
 	#end
+	
+	/**
+	  * From foo.bar.SomeManager creates foo.bar.SomeManagerService 
+	  */
+	public static function getRemotingInterfaceNameFromClassName (managerClassName :String) :String
+	{
+		var remoteId = managerClassName;
+		var tokens = remoteId.split(".");
+		remoteId = tokens[tokens.length - 1];
+		remoteId = remoteId.substr(0, 1).toUpperCase() + remoteId.substr(1);
+		// remoteId += "Service";
+		remoteId = "I" + remoteId;
+		tokens[tokens.length - 1] = remoteId;
+		return tokens.join('.'); 
+	}
 }
