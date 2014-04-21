@@ -6,7 +6,7 @@ class RemotingUtil
 {
 	public static var REMOTING_ID_NAME = "REMOTING_ID";
 	public static var REMOTING_INTERFACE_NAME = "REMOTING_INTERFACE";
-	
+
 	/**
 	  * Creates a remoting id from a manager class name. E.g.: 
 	  * 'FooManager' will become 'fooService'.

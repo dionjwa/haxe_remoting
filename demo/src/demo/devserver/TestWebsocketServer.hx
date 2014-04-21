@@ -1,7 +1,7 @@
 package demo.devserver;
 
 import js.Node;
-import js.node.WebSocketNode;
+import js.node.WebSocketServer;
 
 using Lambda;
 

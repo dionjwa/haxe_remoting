@@ -12,19 +12,19 @@ class MiddlewareBuilder
 	//The context holds all the different api/services.
 	var _context :Context;
 	var _serviceHandler :NodeJsHtmlConnection;
-	
+
 	public function new ()
 	{
 		_context = new Context();
 		_serviceHandler = new NodeJsHtmlConnection(_context);
 	}
-	
+
 	public function allowJsonFallback () :MiddlewareBuilder
 	{
 		_serviceHandler = new NodeJsHtmlConnectionJsonFallback(_context);
-		return this;	
+		return this;
 	}
-	
+
 	public function addRemotingManager (remotingInstance :Dynamic) :MiddlewareBuilder
 	{
 		_context.addObject(
@@ -32,7 +32,7 @@ class MiddlewareBuilder
 			remotingInstance);
 		return this;
 	}
-	
+
 	public function buildConnectMiddleware () :NodeHttpServerReq->NodeHttpServerResp->(Void->MiddleWare)->Void
 	{
 		var basicHandler = buildBasicHandler();
@@ -42,7 +42,7 @@ class MiddlewareBuilder
 			}
 		}
 	}
-	
+
 	public function buildBasicHandler () :NodeHttpServerReq->NodeHttpServerResp->Bool
 	{
 		return function (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool {

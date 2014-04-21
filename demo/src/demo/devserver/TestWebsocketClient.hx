@@ -1,7 +1,7 @@
 package demo.devserver;
 
 import transition9.remoting.NodeJsHtmlConnection;
-import js.node.WebSocketNode;
+import js.node.WebSocketServer;
 import js.Node;
 
 class TestWebsocketClient

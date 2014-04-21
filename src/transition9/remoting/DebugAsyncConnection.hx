@@ -15,7 +15,7 @@ class DebugAsyncConnection
 	/** Client side */
 	var _context : Context;
 	var __path : Array<String>;
-	
+
 	public static var serverContext :Context;
 
 	public function new( ctx, ?path) {
@@ -46,7 +46,7 @@ class DebugAsyncConnection
 			}
 		});
 	}
-	
+
 	static function doCall(path : Array<String>, params : String, cb :String->Void) : Void 
 	{
 			var params :Array<Dynamic> = new haxe.Unserializer(params).unserialize();

@@ -29,28 +29,28 @@ import js.Node;
 class NodeJsRelayHtmlConnection
 {
 	var _context :Context;
-	
+
 	public function new (ctx :Context)
 	{
 		_context = ctx;
 	}
-	
+
 	public function connect (ctx :Context) :Void
 	{
 		if (_context != null) throw "Context is already set";
 		_context = ctx;
 	}
-	
+
 	public function handleRequest (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool 
 	{
 		if (req.method != "POST" || req.headers[untyped "x-haxe-remoting"] != "1") {
 			return false;
 		}
-		
+
 		//Get the POST data
 		req.setEncoding("utf8");
 		var content = "";
-		
+
 		req.addListener("data", function(chunk) {
 			content += chunk;
 		});
@@ -59,11 +59,11 @@ class NodeJsRelayHtmlConnection
 		req.addListener("end", function() {
 			req.removeAllListeners("data");
 			req.removeAllListeners("end");
-			
+
 			var relay = new NodeRelay(function (data :Dynamic) {
 				res.end("hxr" + haxe.Serializer.run(data));
 			});
-			
+
 			relay.onError = function (err :Dynamic) {
 				var message = (err.message != null) ? err.message : err;
 				var stack = err.stack;
@@ -75,11 +75,11 @@ class NodeJsRelayHtmlConnection
 				s.serializeException(message);
 				res.end("hxr" + s.toString());
 			};
-			
+
 			res.setHeader("Content-Type", "text/plain");
 			res.setHeader("x-haxe-remoting", "1");
 			res.writeHead(200);
-			
+
 			try {
 				var params = querystring.parse(content);
 				var requestData = params.__x;
@@ -92,9 +92,9 @@ class NodeJsRelayHtmlConnection
 				relay.error(e);
 			}
 		});
-		
+
 		return true;
 	}
-	
+
 	private static var querystring = Node.require("querystring");
 }

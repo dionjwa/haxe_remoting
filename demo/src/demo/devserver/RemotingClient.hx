@@ -21,11 +21,11 @@ class RemotingClient
 		var url = "http://localhost:" + program.port;
 		var conn = haxe.remoting.HttpAsyncConnection.urlConnect(url);
 		conn.setErrorHandler(function(error) {
-			#if haxe3
-			Log.error(error + "\n" + haxe.CallStack.toString(haxe.CallStack.callStack()));
-			#else
-			Log.error(error + "\n" + haxe.Stack.toString(haxe.Stack.callStack()));
-			#end
+			// #if flambe
+			// Log.error(error + "\n" + haxe.CallStack.toString(haxe.CallStack.callStack()));
+			// #else
+			trace("error", error + "\n" + haxe.CallStack.toString(haxe.CallStack.callStack()));
+			// #end
 			
 		});
 		
@@ -49,7 +49,11 @@ class RemotingClient
 					queryAndSendUserInput("Not a valid number, try again:");
 				} else {
 					exampleProxy.processInput(input, function(result :Int) {
+						#if flambe
 						Log.info("Result from server " + Node.stringify(result));
+						#else
+						trace("Result from server " + Node.stringify(result));
+						#end
 						queryAndSendUserInput(null);
 					});
 				}

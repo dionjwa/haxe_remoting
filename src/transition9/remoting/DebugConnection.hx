@@ -13,7 +13,7 @@ class DebugConnection
 	/** Client side */
 	var _context : Context;
 	var __path : Array<String>;
-	
+
 	public static var serverContext :Context;
 
 	public function new( ctx, ?path) {
@@ -38,7 +38,7 @@ class DebugConnection
 		var data = doCall(__path, params);
 		return new haxe.Unserializer(data).unserialize();
 	}
-	
+
 	static function doCall(path : Array<String>, params : String ) : String 
 	{
 		try {

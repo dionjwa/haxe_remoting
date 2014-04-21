@@ -1,5 +1,4 @@
 package demo.devserver;
-
 class CompileAll
 {
 	public static function main () :Void
@@ -18,5 +17,4 @@ class CompileAll
 			trace(t);
 		}
 	}
-
 }

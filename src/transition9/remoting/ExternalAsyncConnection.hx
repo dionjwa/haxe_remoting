@@ -18,10 +18,10 @@ class ExternalAsyncConnection implements AsyncConnection
 	var __data : { name : String, ctx : Context, #if js flash : String #end };
 	var __path : Array<String>;
 	var _errorHandler :Dynamic->Void;
-	
+
 	static var _callbackHash :Int = 1;
 	static var _callbacks = new Map<Int, Null<Dynamic>->Void>();
-	
+
 	function new( data, path ) {
 		__data = data;
 		__path = path;
@@ -40,7 +40,7 @@ class ExternalAsyncConnection implements AsyncConnection
 		connections.remove(__data.name);
 		_errorHandler = null;
 	}
-	
+
 	public function setErrorHandler (handler :Dynamic->Void) :Void
 	{
 		_errorHandler = handler;
@@ -150,7 +150,7 @@ class ExternalAsyncConnection implements AsyncConnection
 			throw e;
 		}
 	}
-	
+
 	static function doCallback(name :String, callbackId :Int, data :String) : Void {
 		var cnx = connections.get(name);
 		if( cnx == null ) throw "Unknown connection : "+name;

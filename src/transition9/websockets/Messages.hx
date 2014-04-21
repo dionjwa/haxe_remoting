@@ -3,7 +3,7 @@ package transition9.websockets;
 import haxe.Unserializer;
 
 #if !macro
-	#if (nodejs || nodejs_std)
+	#if (nodejs)
 	import js.Node;
 	#end
 #end
@@ -31,15 +31,15 @@ class Messages
 			return null;
 		#end
 	}
-	
+
 	public static function decodeJsonMessage <T>(message :String) :T
 	{
 		#if !macro
 			try {
 				#if (nodejs || nodejs_std)
 				return Node.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));
-				#elseif html5
-				return JSON.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));
+				#elseif js
+				return haxe.Json.parse(message.substr(0, Constants.PREFIX_HAXE_JSON.length));
 				#end
 			} catch (e :Dynamic) {
 				#if flambe

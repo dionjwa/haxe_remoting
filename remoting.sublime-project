@@ -1,0 +1,39 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "/Users/dion/storage/projects/haxelibs/remoting"
+		},
+		{
+			"name":"t9",
+			"file_exclude_patterns":
+			[
+				".tags",
+				".tags_sorted_by_file"
+			],
+			"follow_symlinks": true,
+			"path": "/Users/dion/storage/projects/haxelibs/t9_public"
+		},
+		{
+			"name":"haxenode",
+			"file_exclude_patterns":
+			[
+				".tags",
+				".tags_sorted_by_file"
+			],
+			"follow_symlinks": true,
+			"path": "/Users/dion/storage/projects/haxelibs/node-std/src"
+		},
+		{
+			"name":"haxe/std",
+			"follow_symlinks": true,
+			"path": "/usr/lib/haxe/std"
+		},
+		{
+			"name":"tink_core",
+			"follow_symlinks": true,
+			"path": "/usr/lib/haxe/lib/tink_core/1,0,0-rc,2/"
+		}
+	]
+}

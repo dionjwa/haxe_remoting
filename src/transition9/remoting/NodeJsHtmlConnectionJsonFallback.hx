@@ -30,7 +30,7 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 	{
 		super(ctx);
 	}
-	
+
 	override public function handleRequest (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool 
 	{
 		if (super.handleRequest(req, res)) {
@@ -39,7 +39,7 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 			return handleJsonRequest(req, res);
 		}
 	}
-	
+
 	public function handleJsonRequest (req :NodeHttpServerReq, res :NodeHttpServerResp) :Bool 
 	{
 		res.setHeader("Content-Type", "application/json");
@@ -51,7 +51,7 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 				var args :Array<Dynamic> = [];
 				try {
 					if (parsedUrl != null) {
-							
+
 						if (parsedUrl.query != null) {
 							var keys = [];
 							for(key in Reflect.fields(parsedUrl.query)) {
@@ -84,7 +84,7 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 						trace(e);
 					#end
 				}
-				
+
 				res.writeHead(200);
 				var cb = function (data :Dynamic) {
 					res.end('{"status": "success",  "result": ' + Node.stringify(data) + '}');
@@ -108,7 +108,7 @@ class NodeJsHtmlConnectionJsonFallback extends NodeJsHtmlConnection
 		});
 		return true;
 	}
-	
+
 	private static function compareStrings(a :String, b :String) :Int 
 	{
 		a = a.toLowerCase();

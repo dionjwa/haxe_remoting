@@ -10,7 +10,11 @@ class ExampleRemotingService
 	@remote
 	public function processInput (userInput :Int, cb :Int->Void) :Void
 	{
-		Log.info("From client got " + userInput +", adding 11 and returning " + (11 + userInput));
+		// #if flambe
+		// Log.info("From client got " + userInput +", adding 11 and returning " + (11 + userInput));
+		// #else
+		trace("info", "From client got " + userInput +", adding 11 and returning " + (11 + userInput));
+		// #end
 		cb(11 + userInput);
 	}
 }

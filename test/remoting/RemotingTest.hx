@@ -15,24 +15,26 @@ using StringTools;
 /**
  * Serialization tests
  */
-class RemotingTest 
+class RemotingTest
 {
-	public function new() 
+	public function new()
 	{
 	}
-	
+
 	@Before
 	public function setup (cb :Void->Void) :Void
 	{
+		Log.info("setup");
 		cb();
 	}
-	
+
 	@After
 	public function tearDown (cb :Void->Void) :Void
 	{
+		Log.info("tearDown");
 		cb();
 	}
-	
+
 	/**
 	  * Make sure the interface has all the methods in the remoting
 	  * class with a @remote metadata label.
@@ -51,7 +53,7 @@ class RemotingTest
 		}
 		Assert.that(totalRemotingFields == 2);
 	}
-	
+
 	/**
 	  * Make sure the interface has all the methods in the remoting
 	  * class with a @remote metadata label.
@@ -62,14 +64,14 @@ class RemotingTest
 		var meta = haxe.rtti.Meta.getFields(RemotingManager);
 		Assert.that(meta != null);
 		var totalRemotingFields = 0;
-		
-		var remotingClientInstance = 
+
+		var remotingClientInstance =
 			transition9.remoting.Macros.buildAndInstantiateRemoteProxyClass(
 				"remoting.buildInterfaceSupport.RemotingManager",
 				new DummyConnection());
-				
+
 		var remotingClass = Type.getClass(remotingClientInstance);
-		
+
 		for (fieldName in Type.getInstanceFields(RemotingManager)) {
 			if (Reflect.hasField(meta, fieldName) && Reflect.hasField(Reflect.field(meta, fieldName), "remote")) {
 				Assert.that(Type.getInstanceFields(remotingClass).has(fieldName));
@@ -78,7 +80,7 @@ class RemotingTest
 		}
 		Assert.that(totalRemotingFields == 2);
 	}
-	
+
 	/**
 	  * Make sure the build remoting server class has the added static fields
 	  */
@@ -91,7 +93,7 @@ class RemotingTest
 	}
 }
 
-class DummyConnection 
+class DummyConnection
 	implements haxe.remoting.AsyncConnection
 {
 	public function new() {}

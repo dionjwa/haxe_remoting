@@ -39,20 +39,20 @@ class Macros
 			// When running in code completion, skip out early
 			return haxe.macro.Context.getBuildFields();
 		}
-		
+
 		var pos = Context.currentPos();
-		
+
 		var cls = Context.getLocalClass().get();
-		
+
 		//add 'keep' metadata to tell the compiler to not remove methods with --dead-code-elimination
 		//which will remove the hxSerialize methods, for instance.
 		cls.meta.add(":keep", [], pos);
-		
+
 		// Context.warning("cls: " + cls, pos);
-		
+
 		var serializableFieldNames = [];
-		var classfields :Array<ClassField> = MacroUtil.getAllClassFields(cls);
-		
+		var classfields :Array<ClassField> = transition9.macro.MacroUtil.getAllClassFields(cls);
+
 		if (classfields != null) {
 			for (classField in classfields) {
 				if (classField.meta.has("serialize")) {
@@ -63,9 +63,9 @@ class Macros
 				}
 			}
 		}
-		
+
 		var buildFields = haxe.macro.Context.getBuildFields();
-		
+
 		for (f in buildFields) {
 			if (f.meta != null) {
 				for (m in f.meta) {
@@ -76,7 +76,7 @@ class Macros
 				}
 			}
 		}
-		
+
 		var serializeExpressions = [];
 		var unserializeExpressions = [];
 		for (field in serializableFieldNames) {
@@ -86,19 +86,19 @@ class Macros
 			#end
 			unserializeExpressions.push(Context.parse(field + " = s.unserialize()", pos));
 		}
-		
+
 		var serializeBlock = {expr:ExprDef.EBlock(serializeExpressions), pos :pos};
 		var unserializeBlock = {expr:ExprDef.EBlock(unserializeExpressions), pos :pos};
-		
+
 		var serializerFields = flambe.util.Macros.buildFields(macro {
 			function public__hxSerialize(s: haxe.Serializer) {$serializeBlock;}
 			function public__hxUnserialize(s: haxe.Unserializer) {$unserializeBlock;}
 		});
-		
+
 		for (newField in serializerFields) {
 			newField.meta = [{name:":keep", params:[], pos:pos}];
 		}
-		
+
 		return haxe.macro.Context.getBuildFields().concat(serializerFields);
 	}
 }
