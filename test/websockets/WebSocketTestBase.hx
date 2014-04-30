@@ -26,7 +26,6 @@ class WebSocketTestBase
 			});
 	}
 
-
 	public function tearDown(__return :Void->Void)
 	{
 		Log.info("WebSocketTestBase.teardown");
@@ -45,5 +44,5 @@ class WebSocketTestBase
 
 	var _port :Int;
 	var _webSocketServer :WebSocketServer;
-	static var WEBSOCKET_PORT_COUNTER :Int = 8999;
+	static var WEBSOCKET_PORT_COUNTER :Int = 9999;
 }

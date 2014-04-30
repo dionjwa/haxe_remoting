@@ -27,9 +27,9 @@ class Tests
 		} catch (e :Dynamic) {}
 #end
 		var asyncTestClasses :Array<Class<Dynamic>> = new Array<Class<Dynamic>>();
-		// asyncTestClasses.push(remoting.RemotingTest);
+		asyncTestClasses.push(remoting.RemotingTest);
 		asyncTestClasses.push(websockets.WebSocketBasicTest);
-		// asyncTestClasses.push(websockets.WebSocketRPCTest);
+		asyncTestClasses.push(websockets.WebSocketRPCTest);
 		transition9.unit.AsyncTestTools.runTestsOn(asyncTestClasses);
 
 	}

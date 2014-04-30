@@ -4,7 +4,6 @@ import haxe.Json;
 
 import com.dongxiguo.continuation.Async;
 
-import transition9.remoting.jsonrpc.RPCConnectionWebsocket;
 import transition9.async.Step;
 
 import tink.core.Pair;
@@ -55,7 +54,7 @@ class WebSocketBasicTest extends WebSocketTestBase
 		var onWebsocketRequest = function(request :WebSocketRequest) {
 			serverClientConnection = request.accept(null, request.origin);
 			serverConnectedCallback(null, "ServerConnected");
-			Log.info(Date.now() + ' Connection accepted.');
+			Log.debug(Date.now() + ' Connection accepted.');
 			serverClientConnection.on('message', function(message :WebSocketMessage) {
 				if (message.type == 'utf8') {
 					Log.info('Received Message: ' + message.utf8Data);
@@ -127,7 +126,7 @@ class WebSocketBasicTest extends WebSocketTestBase
 						step.error("Client got the wrong message");
 					}
 				}
-				websocketClient.onopen = function(event) {
+				websocketClient.onopen = function() {
 					trace("Client connection opened ");
 					madeConnection = true;
 					clientConnectedCallback(null, "ClientConnected");

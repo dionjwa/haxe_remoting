@@ -1,3 +1,5 @@
 #! /usr/bin/env sh
 mkdir -p build
-haxe -cmd "node build/nodejs_test.js" test/travis.hxml
+echo $1
+echo $2
+haxe -cmd "node build/nodejs_test.js" $1 $2 test/travis.hxml

@@ -1,5 +1,15 @@
 package transition9.websockets;
 
+import flambe.util.Assert;
+import flambe.util.Signal2;
+import flambe.util.Signal1;
+import flambe.util.SignalConnection;
+
+import haxe.Serializer;
+import haxe.Unserializer;
+
+import transition9.websockets.Messages;
+
 #if !macro
 	#if (nodejs || nodejs_std)
 	import js.node.WebSocketServer;
@@ -20,7 +30,7 @@ typedef RouterSocketConnection = { #if !macro >WebSocketConnection, #end
 /**
   * 
   */
-class WebsocketRouter
+class WebsocketRouter2
 {
 	public var clientConnected (default, null):Signal1<RouterSocketConnection>;
 	public var clientDisconnected (default, null):Signal1<RouterSocketConnection>;

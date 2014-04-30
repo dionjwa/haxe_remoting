@@ -1,9 +1,10 @@
 package transition9.remoting.jsonrpc;
 
 //http://www.jsonrpc.org/specification
+
 typedef RequestDef = {
 	@:optional
-	var id :String;
+	var id :Dynamic;
 
 	var method :String;
 
@@ -14,23 +15,23 @@ typedef RequestDef = {
 	var jsonrpc :String;
 }
 
+typedef ResponseError = {
+	var code :Int;
+	var message :String;
+	@:optional
+	var data :Dynamic;
+}
+
 typedef ResponseDef = {
 	@:optional
-	var id :String;
+	var id :Dynamic;
 
 	@:optional
 	var result :Dynamic;
 
 	@:optional
-	var error :ResposeError;
+	var error :ResponseError;
 
 	@:optional //It's technically not optional but we'll implement it later
 	var jsonrpc :String;
-}
-
-typedef ResposeError = {
-	var code :Int;
-	var message :String;
-	@:optional
-	var data :Dynamic;
 }
