@@ -5,8 +5,8 @@ import haxe.remoting.Context;
 
 /**
 	Asynchronous (both sides) communication between Flash and Javascript.
-	Stores callbacks from the client in an IntHash, and calls them when the 
-	server call returns.  
+	Stores callbacks from the client in an IntHash, and calls them when the
+	server call returns.
 	If the callback isn't called within some time limit, an error is thrown.
 **/
 class ExternalAsyncConnection implements AsyncConnection
@@ -18,14 +18,14 @@ class ExternalAsyncConnection implements AsyncConnection
 	var __data : { name : String, ctx : Context, #if js flash : String #end };
 	var __path : Array<String>;
 	var _errorHandler :Dynamic->Void;
-	
+
 	static var _callbackHash :Int = 1;
 	#if haxe3
 	static var _callbacks = new Map<Int, Null<Dynamic>->Void>();
 	#else
 	static var _callbacks = new IntHash<Null<Dynamic>->Void>();
 	#end
-	
+
 	function new( data, path ) {
 		__data = data;
 		__path = path;
@@ -44,7 +44,7 @@ class ExternalAsyncConnection implements AsyncConnection
 		connections.remove(__data.name);
 		_errorHandler = null;
 	}
-	
+
 	public function setErrorHandler (handler :Dynamic->Void) :Void
 	{
 		_errorHandler = handler;
@@ -64,9 +64,9 @@ class ExternalAsyncConnection implements AsyncConnection
 	}
 	#end
 
-	public function call( params : Array<Dynamic>, ?onResult :Null<Dynamic>->Void ) : Void 
+	public function call( params : Array<Dynamic>, ?onResult :Null<Dynamic>->Void ) : Void
 	{
-		var callbackHash = ExternalAsyncConnection._callbackHash++; 
+		var callbackHash = ExternalAsyncConnection._callbackHash++;
 		if (onResult != null) {
 			//Store the callback, and set a timeout for the callback
 			ExternalAsyncConnection._callbacks.set(callbackHash, onResult);
@@ -76,11 +76,11 @@ class ExternalAsyncConnection implements AsyncConnection
 			haxe.Timer.delay(function () :Void {
 				if (ExternalAsyncConnection._callbacks.exists(callbackHash)) {
 					ExternalAsyncConnection._callbacks.remove(callbackHash);
-					var errorText = "call " + callbackHash + " with params " + params + " did not return after " + CALLBACK_TIMEOUT_MS + "ms"; 
+					var errorText = "call " + callbackHash + " with params " + params + " did not return after " + CALLBACK_TIMEOUT_MS + "ms";
 					if (self._errorHandler != null) {
 						self._errorHandler(errorText);
 					} else {
-						throw errorText; 
+						throw errorText;
 					}
 				}
 			}, CALLBACK_TIMEOUT_MS);
@@ -91,7 +91,7 @@ class ExternalAsyncConnection implements AsyncConnection
 		var data = null;
 		#if flash
 		try {
-			data = flash.external.ExternalInterface.call("haxe.remoting.ExternalAsyncConnection.doCall",__data.name,__path.join("."),params, _callbackHash);
+			data = flash.external.ExternalInterface.call("haxe.remoting.ExternalAsyncConnection.doCall",__data.name,__path.join("."),params, callbackHash);
 		} catch (e :Dynamic) {
 			trace("Error calling __data.name=" + __data.name + ", path=" + __path.join(".") + ", params=" + params + "\ne=" + e);
 			if (_errorHandler != null) {
@@ -158,7 +158,7 @@ class ExternalAsyncConnection implements AsyncConnection
 			throw e;
 		}
 	}
-	
+
 	static function doCallback(name :String, callbackId :Int, data :String) : Void {
 		var cnx = connections.get(name);
 		if( cnx == null ) throw "Unknown connection : "+name;
@@ -168,7 +168,7 @@ class ExternalAsyncConnection implements AsyncConnection
 		if (cb != null) {
 			var cbData = new haxe.Unserializer(data).unserialize();
 			cb(cbData);
-		} 
+		}
 	}
 
 	#if flash
