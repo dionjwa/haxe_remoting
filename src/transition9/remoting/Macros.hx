@@ -25,42 +25,42 @@ using Lambda;
 using StringTools;
 
 /**
-  * Macros for creating remoting proxy classes from the remoting class or 
+  * Macros for creating remoting proxy classes from the remoting class or
   * remoting interfaces.
   */
 class Macros
 {
 	/**
 	 * Usage:
-	 * 
+	 *
 	 * @:build(transition9.remoting.Macros.remotingClass())
 	 * class YourServerRemotingClass {
 	 *
 	 * This will add the following static var fields to the class:
 	 * REMOTING_INTERFACE: A reference to the dynamically build interface matching the remote
 	 * 										 methods (functions with the @remote metadata) of this class
-	 * 
+	 *
 	 * REMOTING_ID: Used internally by the remoting system.
 	 * @convertNodeRelayArgs Whether to convert the callback arg to a NodeRelay object.
 	 */
-	#if haxe3 macro #else @:macro #end 
+	#if haxe3 macro #else @:macro #end
 	public static function remotingClass(?convertNodeRelayArgs :Bool = false) :Array<Field>
 	{
 		var pos = Context.currentPos();
 		var cls = haxe.macro.Context.getLocalClass().get();
 		var className = cls.name;
-		var fullClassName = cls.pack.join(".") + "." + cls.name;
+		var fullClassName = if (cls.pack.length > 0) cls.pack.join(".") + "." + cls.name else cls.name;
 		var interfacePackageName = getRemotingInterfaceNameFromClassName(fullClassName);
-		
+
 		var interfaceTypePath :TypePath = {
 			sub: null,
 			params: [],
 			pack :cls.pack,
 			name: getRemotingInterfaceNameFromClassName(cls.name)
 		};
-		
+
 		// Context.warning("fullClassName:" + fullClassName, pos);
-		
+
 		var interfaceType :TypeDefinition = {
 			pos :pos,
 			params :[],
@@ -71,51 +71,51 @@ class Macros
 			isExtern :false,
  			fields :createAsyncProxyMethodsFromClassFile(fullClassName, true, convertNodeRelayArgs)
 		};
-		
+
 		// Context.warning("created methods: " + createAsyncProxyMethodsFromClassFile(fullClassName, true, convertNodeRelayArgs).length, pos);
-		
+
 		Context.defineType(interfaceType); //Create the remoting manager interface.
-		
+
 		var code = "{"
-			+ "var public__static__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";" 
+			+ "var public__static__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";"
 			+ 	'var public__static__' + RemotingUtil.REMOTING_ID_NAME + ' = "' + RemotingUtil.getRemotingIdFromManagerClassName(className) + '";'
 			+ "}";
-		
+
 		var fields = flambe.util.Macros.buildFields(Context.parse(code, pos));
-		
+
 		return haxe.macro.Context.getBuildFields().concat(fields);
 	}
-	
+
 	#if haxe3 macro #else @:macro #end
 	public static function getRemoteProxyClass(classNameExpr: Expr, ?excludeManager :Bool = true) :Expr
 	{
 		var pos =  Context.currentPos();
 		var className = getClassNameFromClassExpr(classNameExpr);
 		var proxyClassName = getProxyRemoteClassName(className);
-		
+
 		try {
 			var x = Context.getType(proxyClassName);
 		} catch (e :Dynamic) {
 			buildRemoteProxyClassInternal(className, null);
 		}
-		
+
 		if (excludeManager) {
 			// Context.warning("Excluding " + className, pos);
 			Compiler.exclude(className);
 		}
-		
+
 		return createClassConstant(proxyClassName, pos);
 	}
-	
+
 	/**
-	  * Adds all methods from implemented interfaces for a class extending 
+	  * Adds all methods from implemented interfaces for a class extending
 	  * net.amago.components.remoting.AsyncProxy
 	  */
 	#if haxe3 macro #else @:macro #end
 	public static function addRemoteMethodsToInterfaceFrom(classExpr: Expr, ?convertNodeRelayArgsExpr :Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
-		
+
 		var convertNodeRelayArgs :Bool = convertNodeRelayArgsExpr == null ? true : switch (convertNodeRelayArgsExpr.expr) {
 			case EConst(c):
 				switch (c) {
@@ -123,36 +123,36 @@ class Macros
 						v != "false";
 					default: true;
 				}
-					
+
 			default: true;
 		}
-		
+
 		var className = getClassNameFromClassExpr(classExpr);
-		
+
 		var fields = haxe.macro.Context.getBuildFields();
 		var newFields = createAsyncProxyMethodsFromClassFile(className, true, convertNodeRelayArgs);
 		fields = fields.concat(newFields);
-		
+
 		return fields;
 	}
-	
+
 	/**
-	  * Takes a server remoting class and the connection variable, 
+	  * Takes a server remoting class and the connection variable,
 	  * and returns an instance of the newly created proxy class.
 	  */
 	#if haxe3 macro #else @:macro #end
 	public static function buildAndInstantiateRemoteProxyClass(classExpr: Expr, connectionExpr: Expr, ?implementExpr :Expr) :Expr
 	{
 		var pos = Context.currentPos();
-		
+
 		var className = getClassNameFromClassExpr(classExpr);
 		var proxyClassName = getProxyRemoteClassName(className);
-		
+
 		//If you're building the proxy, you don't want the remote logic compiled in
 		#if client
 		Compiler.exclude(className);
 		#end
-		
+
 		try {
 			var proxyType = Context.getType(proxyClassName);
 			var typePath :TypePath = {
@@ -167,9 +167,9 @@ class Macros
 					typePath.pack = typeRef.get().pack;
 				default: Context.warning("Type not handled: " + StdType.enumConstructor(proxyType), pos);
 			}
-			return 
+			return
 			{
-				expr: ENew(typePath, [connectionExpr]), 
+				expr: ENew(typePath, [connectionExpr]),
 				pos:pos
 			};
 		} catch (e :Dynamic) {
@@ -177,7 +177,7 @@ class Macros
 			return buildRemoteProxyClassInternal(className, connectionExpr, implementExpr);
 		}
 	}
-	
+
 	/**
 	  * Takes a server remoting class adds the remoting methods to the proxy class.
 	  */
@@ -185,74 +185,74 @@ class Macros
 	public static function addProxyRemoteMethodsFromClass(classExpr: Expr) :Array<Field>
 	{
 		var pos = Context.currentPos();
-		
+
 		var className = getClassNameFromClassExpr(classExpr);
 		var fields = haxe.macro.Context.getBuildFields();
 		var newFields = createAsyncProxyMethodsFromClassFile(className, false, true);
 		fields = fields.concat(newFields);
-		
+
 		return fields;
 	}
-	
+
 	#if haxe3 macro #else @:macro #end
 	public static function getRemotingId (classExpr :Expr) :Expr
 	{
 		var className = getClassNameFromClassExpr(classExpr);
 		var remotingId = RemotingUtil.getRemotingIdFromManagerClassName(getClassNameFromClassExpr(classExpr));
 		return { expr : EConst(CString(remotingId)), pos : Context.currentPos() };
-		
+
 		// var remotingId = RemotingUtil.getRemotingIdFromManagerClassName(getClassNameFromClassExpr(classExpr));
 		// return { expr : EConst(CString(remotingId)), pos : Context.currentPos() };
 	}
-	
+
 	/**
 	  * Helper functions
 	  */
 	#if macro
-	static function createAsyncProxyMethodsFromClassFile(remoteClassName : String, 
-		?asInterface :Bool = false, 
+	static function createAsyncProxyMethodsFromClassFile(remoteClassName : String,
+		?asInterface :Bool = false,
 		?convertNodeRelayToCallbacks :Bool = true,
 		?errorAsFirstArg :Bool = false) :Array<Field>
 	{
 		var pos = Context.currentPos();
-		
+
 		var interfacePackageName = getRemotingInterfaceNameFromClassName(remoteClassName);
-		
-		
+
+
 		var fields = [];
 		var remotingId = RemotingUtil.getRemotingIdFromManagerClassName(remoteClassName);
-		
+
 		//Add the constructor
 		if (!asInterface) {
 			fields.push(createNewFunctionBlock(remotingId, pos));
 		}
-		
+
 		// Add "var _conn :haxe.remoting.AsyncConnection;"
 		if (!asInterface) {
 			fields.push(createConnectionField(pos));
 		}
-		
+
 		var remoteMetaRegex : EReg = ~/^[ \t]*@remote.*/;
 		var functionRegex : EReg = ~/[\t ]*(public)?[\t ]*function.*/;
 		var interfaceRegex : EReg = ~/.*\n[\t ]*interface[\t ].*/;
 		var commentRegex : EReg = ~/[\t ]\/\/.*/;
 		var interfaceFunctionExprs = [];
-		
+
 		if (remoteClassName == null || remoteClassName.length == 0) {
 			Context.error("remoteClassName is empty ", pos);
 		}
-		
+
 		var path = Context.resolvePath(remoteClassName.split(".").join("/") + ".hx");
-		
+
 		// Context.warning("path: " + path, pos);
-		
+
 		if (!sys.FileSystem.exists(path)) {
 			Context.error("Remoting class '" + remoteClassName + "' does not resolve to a valid path=" + path, pos);
 		// } else {
 		// 	Context.warning("path: exists" + path, pos);
 		}
-		
-		
+
+
 		var fileContent = "";
 		// open and read file line by line
 		var fin = sys.io.File.read(path, false);
@@ -265,23 +265,23 @@ class Macros
 		}
 		catch( ex:haxe.io.Eof ) {}
 		fin.close();
-		
+
 		var isInterface = interfaceRegex.match(fileContent);
-		
+
 		var lines = fileContent.split("\n");
 		for (ii in 0...lines.length) {
 			// Context.warning("" + lines[ii], pos);
 			if (commentRegex.match(lines[ii])) {
 				continue;
 			}
-			
-			
+
+
 			if (functionRegex.match(lines[ii])) {
 				if (ii > 0 && (isInterface || ((remoteMetaRegex.match(lines[ii - 1]) || lines[ii].indexOf("@remote") > -1)))) {
 					var parserCompatibleLine = lines[ii].replace("@remote", "").replace("public", "") + "{}";
 					parserCompatibleLine = parserCompatibleLine.trim().replace(";", "");
 					var functionExpr = Context.parse(parserCompatibleLine, pos);
-					
+
 					switch(functionExpr.expr) {
 						default://Do nothing
 						case EFunction(name, f)://f is a Function
@@ -289,7 +289,7 @@ class Macros
 							var functionArgsForBlock = new Array<String>();
 							var callBackName :String = "cb";
 							var nodeRelayArg = f.args[f.args.length - 1];//FunctionArg
-							
+
 							if (nodeRelayArg == null) {
 								Context.error("Remote functions must end with a callback or a NodeRelay argument: " + remoteClassName + "." + name, pos);
 							}
@@ -303,7 +303,7 @@ class Macros
 											case TPType(t):
 												var nodeRelayToCallback = TParent(
 													TFunction(
-														[t], 
+														[t],
 														TPath({ sub:null, name:"Void", pack:[], params:[] })
 													)
 												);
@@ -313,17 +313,17 @@ class Macros
 									default:
 								}
 							}
-							
+
 							//Add the function arg names to the connection call
 							if (f.args.length > 1) {
 								for (arg in f.args.slice(0, f.args.length - 1)) {
 									functionArgsForBlock.push(arg.name);
 								}
 							}
-							
+
 							//Create the function block via parsing a string (too complicated otherwise)
 							if (!asInterface) {
-								var exprStr = '_conn.resolve("' + name + '").call([' + 
+								var exprStr = '_conn.resolve("' + name + '").call([' +
 									functionArgsForBlock.join(", ") + ']' + (callBackName != null ? ', ' + callBackName: "") + ')';
 								var functionBlock = ExprDef.EBlock([
 									haxe.macro.Context.parse(exprStr, pos)
@@ -332,42 +332,42 @@ class Macros
 							} else {
 								Reflect.setField(f, "expr", null);
 							}
-							
+
 							var field : Field = {
-								name : name, 
+								name : name,
 								doc : null,
 								access : asInterface ? [] : [Access.APublic],
 								kind : FieldType.FFun(f),
 								pos : pos,
 								meta : []
 							};
-							
+
 							fields.push(field);
 					}
 				}
 			}
 		}
-		
+
 		// if (!asInterface) {
 		// 	var code = "{"
-		// 		// + "var public__static__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";" 
+		// 		// + "var public__static__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";"
 		// 		// + 	'var public__static__' + RemotingUtil.REMOTING_ID_NAME + ' = "' + RemotingUtil.getRemotingIdFromManagerClassName(remoteClassName) + '";'
-				
-		// 		+ "var public__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";" 
+
+		// 		+ "var public__" + RemotingUtil.REMOTING_INTERFACE_NAME + " = " + interfacePackageName + ";"
 		// 		+ 	'var public__' + RemotingUtil.REMOTING_ID_NAME + ' = "' + RemotingUtil.getRemotingIdFromManagerClassName(remoteClassName) + '";'
 		// 		+ "}";
-			
+
 		// 	fields = fields.concat(flambe.util.Macros.buildFields(Context.parse(code, pos)));
 		// }
-		
+
 		return fields;
 	}
-	
+
 	static function buildRemoteProxyClassInternal(className: String, connectionExpr :Expr, ?implementExpr :Expr) :Expr
 	{
 		var pos = Context.currentPos();
 		var proxyClassName = getProxyRemoteClassName(className);
-		
+
 		var implement :Array<TypePath> = null;
 		if (implementExpr != null) {
 			implement = [];
@@ -380,10 +380,10 @@ class Macros
 						name : t.get().name.replace("#", "")
 					}
 					implement.push(path);
-				default: 
+				default:
 			}
 		}
-		
+
 		var newProxyType :haxe.macro.TypeDefinition = {
 			pack: proxyClassName.split(".").length > 0 ? proxyClassName.split(".").slice(0, proxyClassName.split(".").length - 1) : [],
 			name: proxyClassName.split(".")[proxyClassName.split(".").length - 1],
@@ -395,16 +395,16 @@ class Macros
 			//Add the proxy methods from the remote class
 			fields: createAsyncProxyMethodsFromClassFile(className)
 		}
-		
+
 		// Context.warning("newProxyType.fields: " + newProxyType.fields.length, pos);
-		
+
 		// for (f in newProxyType.fields) {
 		// 	Context.warning(f.name, pos);
 		// }
-		
+
 		Context.defineType(newProxyType);
-		
-		return 
+
+		return
 			{
 				expr: ENew(
 				{//haxe.macro.TypePath
@@ -414,24 +414,24 @@ class Macros
 					name: newProxyType.name
 				},[
 				connectionExpr]
-				), 
+				),
 			pos:pos
 			};
 	}
-	
+
 	/**
 	  * Create a class type constant from a class name.
 	  */
 	public static function createClassConstant (className :String, pos :Position) :Expr
 	{
 		var pathTokens = className.split(".");
-		
+
 		if (pathTokens.length == 1) {
 			return {expr: EConst(CString(className)), pos: pos};
 		}
-		
+
 		var pathExpr = null;
-		
+
 		while (pathTokens.length > 1) {
 			if (pathExpr == null) {
 				pathExpr = {expr: EConst(CIdent(pathTokens.shift())), pos: pos};
@@ -439,15 +439,15 @@ class Macros
 				pathExpr = {expr: EField(pathExpr, pathTokens.shift()), pos: pos};
 			}
 		}
-		
+
 		return {
 			expr: EField(pathExpr, pathTokens.shift()),
 			pos: pos
 		}
 	}
-	
+
 	/**
-	  * From foo.bar.SomeManager creates foo.bar.SomeManagerService 
+	  * From foo.bar.SomeManager creates foo.bar.SomeManagerService
 	  */
 	public static function getRemotingInterfaceNameFromClassName (managerClassName :String) :String
 	{
@@ -458,16 +458,16 @@ class Macros
 		// remoteId += "Service";
 		remoteId = "I" + remoteId;
 		tokens[tokens.length - 1] = remoteId;
-		return tokens.join('.'); 
+		return tokens.join('.');
 	}
-	
+
 	/**
-	 * Creates new block for a remoting proxy. 
+	 * Creates new block for a remoting proxy.
 	 */
 	public static function createNewFunctionBlock (remotingId :String, pos :haxe.macro.Position) :Field
 	{
 		var exprStr = '_conn = c.resolve("' + remotingId + '")';
-			
+
 		var func :haxe.macro.Function = {
 			ret: null,
 			params: [],
@@ -475,31 +475,31 @@ class Macros
 			expr: {expr: ExprDef.EBlock([haxe.macro.Context.parse(exprStr, pos)]), pos:pos},
 			args: [{value:null, opt:false, name:"c", type:ComplexType.TPath({sub:null, params:[], pack:["haxe", "remoting"], name:"AsyncConnection"})}] //<FunctionArg>
 		}
-		
+
 		return {
-			name : "new", 
-			doc : null, 
+			name : "new",
+			doc : null,
 			meta : [],
 			access : [Access.APublic],
 			kind : FieldType.FFun(func),
-			pos : pos 
+			pos : pos
 		}
 	}
-	
+
 	public static function createConnectionField (pos :Position) :Field
 	{
 		// Add "var _conn :haxe.remoting.AsyncConnection;"
 		return {
-			name : "_conn", 
-			doc : null, 
-			meta : [], 
-			access : [Access.APrivate], 
-			kind : FVar(TPath({ pack : ["haxe", "remoting"], name : "AsyncConnection", params : [], sub : null }), null), 
-			pos : pos 
+			name : "_conn",
+			doc : null,
+			meta : [],
+			access : [Access.APrivate],
+			kind : FVar(TPath({ pack : ["haxe", "remoting"], name : "AsyncConnection", params : [], sub : null }), null),
+			pos : pos
 		};
 	}
-	
-	
+
+
 	public static function getClassNameFromClassExpr (classNameExpr :Expr) :String
 	{
 		// Context.warning("classNameExpr=" + classNameExpr, Context.currentPos());
@@ -559,12 +559,12 @@ class Macros
 			// 	className = drillIntoEField(e) + "." + field;
 			default: Context.warning(StdType.enumConstructor(classNameExpr.expr) + " not handled", Context.currentPos());
 		}
-		
+
 		// Context.warning("className=" + className, Context.currentPos());
-		
+
 		return className;
 	}
-	
+
 	public static function isInterfaceExpr (typeExpr :Expr) :Bool
 	{
 		// switch(typeExpr.expr) {
@@ -572,18 +572,18 @@ class Macros
 		// 		switch(Context.typeof(typeExpr)) {
 		// 			case TType(t, params):
 		// 				return true;
-		// 			default: 
+		// 			default:
 		// 				return false;
 		// 		}
 		// 	default: return false;
 		// }
 		return false;
 	}
-	
+
 	public static function getProxyRemoteClassName(className : String) :String
 	{
 		return className + "Proxy";
 	}
-	
+
 	#end
 }
