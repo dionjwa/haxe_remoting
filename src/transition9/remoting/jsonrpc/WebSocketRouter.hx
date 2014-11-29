@@ -4,8 +4,8 @@ import haxe.Json;
 
 #if !macro
 	#if nodejs
-	import js.node.WebSocketServer;
-	import js.Node;
+		import js.node.WebSocketServer;
+		import js.Node;
 	#end
 #else
 	import haxe.macro.Expr;

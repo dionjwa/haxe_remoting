@@ -32,6 +32,7 @@ class WebSocketTestBase
 		WebSocketTools.closeWebSocketServer(_webSocketServer, __return);
 	}
 
+	//Callback takes the WebsocketServe and the port it's listening on.
 	public function getWebsocketServer(cb :WebSocketServer->Int->Void)
 	{
 		WEBSOCKET_PORT_COUNTER++;
