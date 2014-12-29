@@ -20,13 +20,13 @@ To build the demos:
 To run the remoting demo:
 
 - In one terminal window run the server:
-	
+
 	node deploy/remoting-server/server.js
 
 - In another terminal window, run the client:
-	
+
 	node deploy/remoting-server/client.js
-	
+
 In the client window, type a number and then enter.  The server sends back a processed result.
 
 
@@ -45,21 +45,21 @@ Assume you have a remoting class on the server:
 			cb("someFoo");
 		}
 	}
-	
+
 On the client, you can construct a fully typed proxy async remoting class with:
 
 	//Create the remoting Html connection
 	var conn = haxe.remoting.HttpAsyncConnection.urlConnect("http://localhost:8000");
-	
-	//Build and instantiate the proxy class with macros.  
+
+	//Build and instantiate the proxy class with macros.
 	//The full path to the server class is given as the first argument, but it is NOT compiled into the client by default
 	var fooProxy = transition9.remoting.Macros.buildAndInstantiateRemoteProxyClass(foo.FooRemote, conn);
-	
+
 	//You can use code completion here
 	fooProxy.getTheFoo("fooId", function (foo :String) :Void {
 		trace("successfully got the foo=" + foo);
 	});
-	
+
 Instead of a remoting class, you can also build the proxy from an interface:
 
 	interface FooRemote
@@ -67,18 +67,18 @@ Instead of a remoting class, you can also build the proxy from an interface:
 		@remote
 		public function getTheFoo(fooId :String, cb :String->Void) :Void;
 	}
-	
+
 You can also create an interface from the remoting class:
 
 	@:build(transition9.remoting.Macros.addRemoteMethodsToInterfaceFrom(foo.FooRemote))
 	interface FooService {}
-	
+
 Then the client proxy class is declared with
 
 	@:build(transition9.remoting.Macros.buildAsyncProxyClassFromInterface(FooRemote))
 	//Or @:build(transition9.remoting.Macros.buildAsyncProxyClassFromInterface("foo.FooRemote"))
 	class FooProxy implements IRemotingService {}:
-	
+
 In the future, you will be able to build and instantiate the interface derived proxy the same as the class derived proxy above.
 
 ## Running the unit tests
@@ -86,7 +86,7 @@ In the future, you will be able to build and instantiate the interface derived p
 There are two unit tests:
 
 	./test/runtests.sh
-	
+
 ## Coming soon:
 
 Websockets.  Relies on the flambe lib.
@@ -94,13 +94,13 @@ Websockets.  Relies on the flambe lib.
 To run the websocket demo:
 
 - In one terminal window run the server:
-	
+
 	node deploy/websocket-server/server.js
 
 - In another terminal window, run the first client:
-	
+
 	node deploy/websocket-server/client.js
-	
+
 - Finally in a third terminal window, run the second client:
-	
+
 	node deploy/websocket-server/client.js
