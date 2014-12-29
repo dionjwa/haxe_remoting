@@ -1,13 +1,10 @@
 [haxe]: http://http://haxe.org
-[flambe]:http://lib.haxe.org/p/flambe
-[wafl]:https://github.com/aduros/flambe/wiki/Wafl
 [nodejs]:http://nodejs.org/
 
 # Asynchronous remoting classes for [Haxe][haxe]
 
 This package consists of:
 
-1. Node.js remoting connections, one using NodeRelay<T> (thanks Bruno Garcia), the other not.
 2. Macros to build async client proxy remoting classes from interfaces or the server remoting class.  All server classes are excluded from the client.
 3. Flash <-> JS asynchronous remoting connection (ExternalAsyncConnection)
 4. Websocket wrappers for passing both JSON and Haxe serialized objects between a websocket client and server (Node.js)
@@ -19,13 +16,7 @@ See the demo for a working example.
 To build the demos:
 
 1. [Install node.js][nodejs].
-1. [Install flambe](https://github.com/aduros/flambe/wiki/Installation).
-2. Configure and run wafl (in the library root):
 
-	wafl configure --debug
-	wafl install
-	
-	
 To run the remoting demo:
 
 - In one terminal window run the server:

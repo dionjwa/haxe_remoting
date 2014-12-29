@@ -1,16 +1,12 @@
 -debug
--D flambe_keep_asserts
--D disable_flambe_logging
 -D travis
 
 -lib nodejs
 -lib polygonal-ds
--lib flambe
 #https://github.com/proletariatgames/haxe-continuation/
 -lib continuation
 -lib tink_core
 -lib mconsole
-# -lib transition9
 -cp ../t9_public/src
 
 -cp src

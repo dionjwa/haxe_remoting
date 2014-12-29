@@ -24,8 +24,8 @@ class RemotingManager
 	public function getFoos (cb: transition9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
 	{
 		Log.info('RemotingManager.getFoos(...) cb=$cb');
-		Log.assert(cb != null, "cb==null");
-		Log.assert(cb != null, "cb==null");
+		Assert.that(cb != null, "cb==null");
+		Assert.that(cb != null, "cb==null");
 		switch(Type.typeof(cb)) {
 			case TFunction://good
 			default: Log.error("cb is not a function");
@@ -42,7 +42,7 @@ class RemotingManager
 	{
 		Log.info('RemotingManager.getFoo(fooName=$fooName)');
 		Log.info('cb=$cb');
-		Log.assert(cb != null, "cb==null");
+		Assert.that(cb != null, "cb==null");
 		switch(Type.typeof(cb)) {
 			case TFunction://good
 			default: Log.error("cb is not a function");

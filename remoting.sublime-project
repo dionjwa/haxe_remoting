@@ -35,5 +35,14 @@
 			"follow_symlinks": true,
 			"path": "/usr/lib/haxe/lib/tink_core/1,0,0-rc,2/"
 		}
-	]
+	],
+	"settings":
+	{
+		"haxe_completion_server_mode": false,
+		"haxe_build_server_mode": false,
+		"haxe_builds":
+		[
+			"build.hxml"
+		]
+	}
 }

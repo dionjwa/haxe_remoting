@@ -1,7 +1,5 @@
 package remoting;
 
-import flambe.util.Assert;
-
 import js.Node;
 
 import remoting.buildInterfaceSupport.BuiltRemotingService;
