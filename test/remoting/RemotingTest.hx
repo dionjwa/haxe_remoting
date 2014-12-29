@@ -4,7 +4,7 @@ import js.Node;
 
 import remoting.buildInterfaceSupport.BuiltRemotingService;
 import remoting.buildInterfaceSupport.RemotingManager;
-import transition9.remoting.RemotingUtil;
+import t9.remoting.RemotingUtil;
 
 using Lambda;
 
@@ -64,7 +64,7 @@ class RemotingTest
 		var totalRemotingFields = 0;
 
 		var remotingClientInstance =
-			transition9.remoting.Macros.buildAndInstantiateRemoteProxyClass(
+			t9.remoting.Macros.buildAndInstantiateRemoteProxyClass(
 				"remoting.buildInterfaceSupport.RemotingManager",
 				new DummyConnection());
 

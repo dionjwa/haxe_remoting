@@ -17,7 +17,7 @@ class WebSocketTestBase
 
 	public function setup(__return :Void->Void)
 	{
-		Log.info("WebSocketTestBase.setup");
+		// Log.info("WebSocketTestBase.setup");
 		getWebsocketServer(
 			function(ws :WebSocketServer, port :Int) {
 				_webSocketServer = ws;
@@ -28,7 +28,7 @@ class WebSocketTestBase
 
 	public function tearDown(__return :Void->Void)
 	{
-		Log.info("WebSocketTestBase.teardown");
+		// Log.info("WebSocketTestBase.teardown");
 		WebSocketTools.closeWebSocketServer(_webSocketServer, __return);
 	}
 

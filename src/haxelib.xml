@@ -1,13 +1,13 @@
 <project name="remoting" url="https://github.com/dionjwa/haxe_remoting" license="BSD">
-        <user name="dionjwa"/>
-        
-        <description>Asynchronous remoting and serialization tools for web services and websockets.</description>
-        
-        <depends name="transition9" version="2.0"/>
-        
-        <version name="3.0">Haxe 3 only.</version>
-        
-        <tag v="nodejs"/>
-        <tag v="remoting"/>
-        <tag v="js"/>
+    <user name="dionjwa"/>
+
+    <description>Asynchronous remoting and serialization tools for web services and websockets.</description>
+
+    <depends name="transition9" version="2.0"/>
+
+    <version name="3.0">Haxe 3 only.</version>
+
+    <tag v="nodejs"/>
+    <tag v="remoting"/>
+    <tag v="js"/>
 </project>

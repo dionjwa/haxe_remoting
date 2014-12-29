@@ -2,8 +2,8 @@ package websockets;
 
 import haxe.Json;
 
-import transition9.remoting.jsonrpc.RPCConnectionWebsocket;
-import transition9.async.Step;
+import t9.remoting.jsonrpc.RPCConnectionWebsocket;
+import t9.async.Step;
 
 import js.Node;
 import js.node.WebSocketServer;

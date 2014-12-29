@@ -20,7 +20,7 @@ class Tests
 		// finally, run the tests
 		r.run();
 
-		trace("async tests:");
+		// trace("async tests:");
 #if (nodejs && !travis)
 		try {
 			untyped __js__("if (require.resolve('source-map-support')) {require('source-map-support').install(); console.log('source-map-support installed');}");
@@ -30,7 +30,7 @@ class Tests
 		asyncTestClasses.push(remoting.RemotingTest);
 		asyncTestClasses.push(websockets.WebSocketBasicTest);
 		asyncTestClasses.push(websockets.WebSocketRPCTest);
-		transition9.unit.AsyncTestTools.runTestsOn(asyncTestClasses);
+		t9.unit.AsyncTestTools.runTestsOn(asyncTestClasses);
 
 	}
 }

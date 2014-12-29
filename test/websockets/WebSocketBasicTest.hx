@@ -4,7 +4,7 @@ import haxe.Json;
 
 import com.dongxiguo.continuation.Async;
 
-import transition9.async.Step;
+import t9.async.Step;
 
 import tink.core.Pair;
 
@@ -54,10 +54,10 @@ class WebSocketBasicTest extends WebSocketTestBase
 		var onWebsocketRequest = function(request :WebSocketRequest) {
 			serverClientConnection = request.accept(null, request.origin);
 			serverConnectedCallback(null, "ServerConnected");
-			Log.debug(Date.now() + ' Connection accepted.');
+			// Log.debug(Date.now() + ' Connection accepted.');
 			serverClientConnection.on('message', function(message :WebSocketMessage) {
 				if (message.type == 'utf8') {
-					Log.info('Received Message: ' + message.utf8Data);
+					// Log.info('Received Message: ' + message.utf8Data);
 					if (clientSentMessage) {
 						step.error("Client already sent a message");
 						return;
@@ -70,11 +70,11 @@ class WebSocketBasicTest extends WebSocketTestBase
 					}
 				}
 				else if (message.type == 'binary') {
-					Log.info('Received Binary Message of ' + message.binaryData.length + ' bytes');
+					// Log.info('Received Binary Message of ' + message.binaryData.length + ' bytes');
 				}
 			});
 			serverClientConnection.on('close', function(reasonCode, description) {
-				Log.info(Date.now() + ' Peer ' + serverClientConnection.remoteAddress + ' disconnected.');
+				// Log.info(Date.now() + ' Peer ' + serverClientConnection.remoteAddress + ' disconnected.');
 			});
 			serverClientConnection.on('error', function(error) {
 				Log.error(Date.now() + ' Error: ' + error);
@@ -92,14 +92,14 @@ class WebSocketBasicTest extends WebSocketTestBase
 				websocketServer.on('connectFailed', onConnectFailed);
 				websocketServer.on('request', onWebsocketRequest);
 
-				Log.info("Client attempted to connect to " + address);
+				// Log.info("Client attempted to connect to " + address);
 				websocketClient = new WebSocket(address);
 
 				clientConnectedCallback = step.parallel();
 				serverConnectedCallback = step.parallel();
 
 				websocketClient.onclose = function(event) {
-					Log.info("websocketClient.onclose: madeConnection=" + madeConnection + ", evt=" + event);
+					// Log.info("websocketClient.onclose: madeConnection=" + madeConnection + ", evt=" + event);
 					if (!madeConnection) {
 						onTestFinish("Failed to make connection before websocket client closed");
 					} else {
@@ -112,14 +112,14 @@ class WebSocketBasicTest extends WebSocketTestBase
 					step.error("websocket client error:" + err);
 				}
 				websocketClient.onmessage = function(message :ClientMessage) {
-					trace("Client received message: " + Json.stringify(message));
+					// trace("Client received message: " + Json.stringify(message));
 					if (clientRecievedMessage) {
 						Log.error("Client already received message");
 						step.error("Client already received message");
 						return;
 					}
 					if (messageToExchange == message.data) {
-						Log.info("Message is good");
+						// Log.info("Message is good");
 						step.cb0();
 					} else {
 						Log.error("Client got the wrong message");
@@ -127,16 +127,16 @@ class WebSocketBasicTest extends WebSocketTestBase
 					}
 				}
 				websocketClient.onopen = function() {
-					trace("Client connection opened ");
+					// trace("Client connection opened ");
 					madeConnection = true;
 					clientConnectedCallback(null, "ClientConnected");
 				}
 			},
 			//Send the message from the client
 			function (err :Dynamic, input1 :String, input2 :String) :Void {
-				Log.info("Connected: " + input1 + " " + input2 + (err != null ? ", err=" + err : ""));
+				// Log.info("Connected: " + input1 + " " + input2 + (err != null ? ", err=" + err : ""));
 				if (err == null) {
-					Log.info("Client successfully connected, now sending message");
+					// Log.info("Client successfully connected, now sending message");
 					websocketClient.send(messageToExchange);
 				} else {
 					Log.info("Passing on error");
@@ -146,7 +146,7 @@ class WebSocketBasicTest extends WebSocketTestBase
 			//Send the message from the server
 			function (err :Dynamic, input :String) :Void {
 				if (err == null) {
-					Log.info("Client successfully sent message to server, now server sends message back to client");
+					// Log.info("Client successfully sent message to server, now server sends message back to client");
 					serverClientConnection.sendUTF(messageToExchange);
 				} else {
 					step.error(err);
@@ -155,7 +155,7 @@ class WebSocketBasicTest extends WebSocketTestBase
 			//Close the client connection
 			function (err :Dynamic, input :String) :Void {
 				if (err == null) {
-					Log.info("Client received message from server, now closing");
+					// Log.info("Client received message from server, now closing");
 					websocketClient.close();
 				} else {
 					step.error(err);
@@ -163,7 +163,7 @@ class WebSocketBasicTest extends WebSocketTestBase
 			},
 			//Close the websocket
 			function (err :Dynamic, input :String) :Void {
-				Log.info("Client connection closed" + (err == null ? "" : " err=" + err));
+				// Log.info("Client connection closed" + (err == null ? "" : " err=" + err));
 				onTestFinish(err);
 			},
 		]);

@@ -1,6 +1,6 @@
 package websockets.buildInterfaceSupport;
 
-import transition9.remoting.jsonrpc.RPC;
+import t9.remoting.jsonrpc.RPC;
 /**
   * This remoting class does not use interfaces.  The client proxy is built via:
   *
@@ -12,18 +12,18 @@ import transition9.remoting.jsonrpc.RPC;
 		levelsProxy.getAllLevelNames(cb);
   */
 
-// @:build(transition9.remoting.jsonrpc.Macros.remotingClass())
+// @:build(t9.remoting.jsonrpc.Macros.remotingClass())
 class RemotingManager
-	implements transition9.remoting.jsonrpc.RemotingService
+	implements t9.remoting.jsonrpc.RemotingService
 {
 	public function new ()
 	{
 	}
 
 	@remote
-	public function getFoos (cb: transition9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
+	public function getFoos (cb: t9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
 	{
-		Log.info('RemotingManager.getFoos(...) cb=$cb');
+		// Log.info('RemotingManager.getFoos(...) cb=$cb');
 		Assert.that(cb != null, "cb==null");
 		Assert.that(cb != null, "cb==null");
 		switch(Type.typeof(cb)) {
@@ -38,10 +38,10 @@ class RemotingManager
 	}
 
 	@remote
-	public function getFoo (fooName :String, cb: transition9.remoting.jsonrpc.RPC.ResponseError->String->Void)
+	public function getFoo (fooName :String, cb: t9.remoting.jsonrpc.RPC.ResponseError->String->Void)
 	{
-		Log.info('RemotingManager.getFoo(fooName=$fooName)');
-		Log.info('cb=$cb');
+		// Log.info('RemotingManager.getFoo(fooName=$fooName)');
+		// Log.info('cb=$cb');
 		Assert.that(cb != null, "cb==null");
 		switch(Type.typeof(cb)) {
 			case TFunction://good
@@ -50,7 +50,7 @@ class RemotingManager
 		cb(null, "foo1");
 	}
 
-	public function nonRemotingMethod (cb: transition9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
+	public function nonRemotingMethod (cb: t9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
 	{
 		cb(null, ["foo1", "foo2", "foo3"]);
 	}

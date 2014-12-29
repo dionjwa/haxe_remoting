@@ -12,7 +12,7 @@ import flambe.server.NodeRelay;
 		levelsProxy.getAllLevelNames(cb);
   */
 
-@:build(transition9.remoting.Macros.remotingClass(true))
+@:build(t9.remoting.Macros.remotingClass(true))
 class RemotingServiceNodeRelay
 	implements BuiltRemotingInterface
 {
