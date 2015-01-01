@@ -1,6 +1,6 @@
 package t9.remoting.jsonrpc;
 
-import t9.remoting.jsonrpc.RPC;
+import haxe.remoting.JsonRPC;
 
 import tink.core.Outcome;
 
@@ -39,7 +39,8 @@ class RPCProxy
 		var request :RequestDef = {
 			id: CALLBACK_IDS++,
 			method: methodName,
-			params: args
+			params: args,
+			jsonrpc: "2.0"
 		};
 		if (cb != null) {
 			_callbacks.set(request.id, cb);
@@ -54,7 +55,13 @@ class RPCProxy
 		if (_callbacks.exists(response.id)) {
 			var cb = _callbacks.get(response.id);
 			_callbacks.remove(response.id);
-			cb(response.error, response.result);
+			if (Reflect.field(response, 'error') == null) {
+				var responseSuccess : ResponseDefSuccess = cast response;
+				cb(null, responseSuccess.result);
+			} else {
+				var responseError : ResponseDefError = cast response;
+				cb(responseError.error, null);
+			}
 		} else {
 			Log.error('No callback for response=$response');
 		}

@@ -1,6 +1,6 @@
 package t9.remoting.jsonrpc;
 
-import t9.remoting.jsonrpc.RPC;
+import haxe.remoting.JsonRPC;
 
 interface ConnectionClient
 {

@@ -1,6 +1,6 @@
 package websockets.buildInterfaceSupport;
 
-import t9.remoting.jsonrpc.RPC;
+import haxe.remoting.JsonRPC;
 /**
   * This remoting class does not use interfaces.  The client proxy is built via:
   *
@@ -21,7 +21,7 @@ class RemotingManager
 	}
 
 	@remote
-	public function getFoos (cb: t9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
+	public function getFoos (cb: haxe.remoting.JsonRPC.ResponseError->Array<String>->Void)
 	{
 		// Log.info('RemotingManager.getFoos(...) cb=$cb');
 		Assert.that(cb != null, "cb==null");
@@ -38,7 +38,7 @@ class RemotingManager
 	}
 
 	@remote
-	public function getFoo (fooName :String, cb: t9.remoting.jsonrpc.RPC.ResponseError->String->Void)
+	public function getFoo (fooName :String, cb: haxe.remoting.JsonRPC.ResponseError->String->Void)
 	{
 		// Log.info('RemotingManager.getFoo(fooName=$fooName)');
 		// Log.info('cb=$cb');
@@ -50,7 +50,7 @@ class RemotingManager
 		cb(null, "foo1");
 	}
 
-	public function nonRemotingMethod (cb: t9.remoting.jsonrpc.RPC.ResponseError->Array<String>->Void)
+	public function nonRemotingMethod (cb: haxe.remoting.JsonRPC.ResponseError->Array<String>->Void)
 	{
 		cb(null, ["foo1", "foo2", "foo3"]);
 	}

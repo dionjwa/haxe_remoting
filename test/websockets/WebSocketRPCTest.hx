@@ -3,9 +3,9 @@ package websockets;
 import com.dongxiguo.continuation.Async;
 
 import haxe.Json;
+import haxe.remoting.JsonRPC;
 
 import t9.remoting.jsonrpc.Context;
-import t9.remoting.jsonrpc.RPC;
 import t9.remoting.jsonrpc.ConnectionClient;
 import t9.remoting.jsonrpc.ClientConnectionWebSocket;
 import t9.remoting.jsonrpc.WebSocketRouter;

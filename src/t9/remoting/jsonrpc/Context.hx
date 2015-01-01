@@ -1,8 +1,7 @@
 package t9.remoting.jsonrpc;
 
 import haxe.Json;
-
-import t9.remoting.jsonrpc.RPC;
+import haxe.remoting.JsonRPC;
 
 #if !macro
 	#if nodejs
@@ -74,11 +73,28 @@ class Context
 				function(err :ResponseError, result :Dynamic) {
 					// Log.info('$request response=$result err=$err');
 					if (request.id != null) {
-						var response :ResponseDef = {
-							id :request.id,
-							result: result,
-							error: err
-						};
+						var response :ResponseDef = null;
+						if (err != null) {
+							var responseError :ResponseDefError = {
+								id :request.id,
+								error: err,
+								jsonrpc: "2.0"
+							};
+							response = responseError;
+						} else {
+							var responseSuccess :ResponseDefSuccess = {
+								id :request.id,
+								result: result,
+								jsonrpc: "2.0"
+							};
+							response = responseSuccess;
+						}
+						// var response :ResponseDef = {
+						// 	id :request.id,
+						// 	result: result,
+						// 	error: err,
+						// 	jsonrpc: "2.0"
+						// };
 						if (clientConnection.connected) {
 							// Log.info('Sending to client=$response');
 							clientConnection.sendUTF(Json.stringify(response));

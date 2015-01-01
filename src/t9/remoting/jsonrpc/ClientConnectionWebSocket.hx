@@ -1,8 +1,8 @@
 package t9.remoting.jsonrpc;
 
 import haxe.Json;
+import haxe.remoting.JsonRPC;
 
-import t9.remoting.jsonrpc.RPC;
 import t9.websockets.WebSocketConnection;
 
 class ClientConnectionWebSocket

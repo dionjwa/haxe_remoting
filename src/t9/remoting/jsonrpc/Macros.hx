@@ -9,6 +9,7 @@
 package t9.remoting.jsonrpc;
 
 import Type in StdType;
+// import haxe.remoting.JsonRPC;
 
 #if macro
 import haxe.macro.Expr;
@@ -141,10 +142,10 @@ class Macros
 										var firstArgType :ComplexType = args[0];
 										switch(firstArgType) {
 											case TPath(typePath):
-												if (typePath.name != "RPC" || typePath.sub != "ResponseError") {
-													Context.error(remoteClassName + "." + name + " does not have t9.remoting.jsonrpc.RPC.ResponseError as the first callback argument " + firstArgType, pos);
+												if (typePath.name != "JsonRPC" || typePath.sub != "ResponseError") {
+													Context.error(remoteClassName + "." + name + " does not have haxe.remoting.JsonRPC.ResponseError as the first callback argument " + firstArgType, pos);
 												}
-											default:Context.error(remoteClassName + "." + name + ": the first argument of the callback is not typed as a t9.remoting.jsonrpc.RPC.ResponseError: " + firstArgType, pos);
+											default:Context.error(remoteClassName + "." + name + ": the first argument of the callback is not typed as a haxe.remoting.JsonRPC.ResponseError: " + firstArgType, pos);
 										}
 
 									default: Context.warning(remoteClassName + "." + name + " does not have a callback", pos);
